@@ -125,6 +125,13 @@ public abstract class Input {
 
 	KeyCode keys = null;
 
+	/*
+	 * catch the implicit non-common constructor references
+	 */
+	private Input() {
+
+	}
+
 	/**
 	 * Create a new Input object with a given keymap object
 	 * 
@@ -139,7 +146,7 @@ public abstract class Input {
 		newKeyMapper = k;
 		canvas = c;
 		rdp = r;
-		if (Options.debug_keyboard)
+		if (r.common.options.debug_keyboard)
 			logger.setLevel(Level.DEBUG);
 		addInputListeners();
 		pressedKeys = new Vector();
@@ -157,16 +164,16 @@ public abstract class Input {
 	 */
 	public Input(RdesktopCanvas c, Rdp r, String keymapFile) {
 		try {
-			newKeyMapper = new KeyCode_FileBased_Localised(keymapFile);
+			newKeyMapper = new KeyCode_FileBased_Localised(keymapFile, r.common);
 		} catch (KeyMapException kmEx) {
 			System.err.println(kmEx.getMessage());
-			if (!Common.underApplet)
+			if (!r.common.underApplet)
 				System.exit(-1);
 		}
 
 		canvas = c;
 		rdp = r;
-		if (Options.debug_keyboard)
+		if (r.common.options.debug_keyboard)
 			logger.setLevel(Level.DEBUG);
 		addInputListeners();
 		pressedKeys = new Vector();
@@ -600,9 +607,9 @@ public abstract class Input {
 			altDown = pressed;
 			return false;
 		case KeyEvent.VK_CAPS_LOCK:
-			if (pressed && Options.caps_sends_up_and_down)
+			if (pressed && rdp.common.options.caps_sends_up_and_down)
 				capsLockOn = !capsLockOn;
-			if (!Options.caps_sends_up_and_down) {
+			if (!rdp.common.options.caps_sends_up_and_down) {
 				if (pressed)
 					capsLockOn = true;
 				else

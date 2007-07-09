@@ -34,7 +34,6 @@ import java.io.IOException;
 import net.propero.rdp.Common;
 import net.propero.rdp.Constants;
 import net.propero.rdp.Input;
-import net.propero.rdp.Options;
 import net.propero.rdp.RdesktopException;
 import net.propero.rdp.RdpPacket;
 import net.propero.rdp.RdpPacket_Localised;
@@ -48,6 +47,19 @@ public abstract class VChannel {
 	protected static Logger logger = Logger.getLogger(Input.class);
 
 	private int mcs_id = 0;
+
+	public Common common;
+
+	/**
+	 * catch the references to non-common constructor
+	 */
+	private VChannel() {
+
+	}
+
+	public VChannel(Common common) {
+		this.common = common;
+	}
 
 	/**
 	 * Provide the name of this channel
@@ -100,8 +112,8 @@ public abstract class VChannel {
 	public RdpPacket_Localised init(int length) throws RdesktopException {
 		RdpPacket_Localised s;
 
-		s = Common.secure.init(Options.encryption ? Secure.SEC_ENCRYPT : 0,
-				length + 8);
+		s = common.secure.init(common.options.encryption ? Secure.SEC_ENCRYPT
+				: 0, length + 8);
 		s.setHeader(RdpPacket.CHANNEL_HEADER);
 		s.incrementPosition(8);
 
@@ -119,7 +131,7 @@ public abstract class VChannel {
 	 */
 	public void send_packet(RdpPacket_Localised data) throws RdesktopException,
 			IOException, CryptoException {
-		if (Common.secure == null)
+		if (common.secure == null)
 			return;
 		int length = data.size();
 
@@ -133,7 +145,7 @@ public abstract class VChannel {
 			int thisLength = Math.min(VChannels.CHANNEL_CHUNK_LENGTH, length
 					- data_offset);
 
-			RdpPacket_Localised s = Common.secure.init(
+			RdpPacket_Localised s = common.secure.init(
 					Constants.encryption ? Secure.SEC_ENCRYPT : 0,
 					8 + thisLength);
 			s.setLittleEndian32(length);
@@ -152,8 +164,8 @@ public abstract class VChannel {
 
 			data_offset += thisLength;
 
-			if (Common.secure != null)
-				Common.secure.send_to_channel(s,
+			if (common.secure != null)
+				common.secure.send_to_channel(s,
 						Constants.encryption ? Secure.SEC_ENCRYPT : 0, this
 								.mcs_id());
 			packets_sent++;

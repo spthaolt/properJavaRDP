@@ -41,25 +41,24 @@ import org.apache.log4j.Logger;
 public class Licence {
 	private Secure secure = null;
 
-	Licence(Secure s) {
+	private Common common;
+
+	Licence(Secure s, Common c) {
 		secure = s;
 		licence_key = new byte[16];
 		licence_sign_key = new byte[16];
+		common = c;
 	}
 
 	private byte[] licence_key = null;
-
 	private byte[] licence_sign_key = null;
-
 	private byte[] in_token = null, in_sig = null;
 
 	static Logger logger = Logger.getLogger(Licence.class);
 
 	/* constants for the licence negotiation */
 	private static final int LICENCE_TOKEN_SIZE = 10;
-
 	private static final int LICENCE_HWID_SIZE = 20;
-
 	private static final int LICENCE_SIGNATURE_SIZE = 16;
 
 	/*
@@ -73,29 +72,20 @@ public class Licence {
 	 */
 
 	private static final int LICENCE_TAG_DEMAND = 0x01;
-
 	private static final int LICENCE_TAG_AUTHREQ = 0x02;
-
 	private static final int LICENCE_TAG_ISSUE = 0x03;
-
 	private static final int LICENCE_TAG_REISSUE = 0x04;
-
 	private static final int LICENCE_TAG_PRESENT = 0x12;
-
 	private static final int LICENCE_TAG_REQUEST = 0x13;
-
 	private static final int LICENCE_TAG_AUTHRESP = 0x15;
-
 	private static final int LICENCE_TAG_RESULT = 0xff;
-
 	private static final int LICENCE_TAG_USER = 0x000f;
-
 	private static final int LICENCE_TAG_HOST = 0x0010;
 
 	public byte[] generate_hwid() throws UnsupportedEncodingException {
 		byte[] hwid = new byte[LICENCE_HWID_SIZE];
 		secure.setLittleEndian32(hwid, 2);
-		byte[] name = Options.hostname.getBytes("US-ASCII");
+		byte[] name = common.options.hostname.getBytes("US-ASCII");
 
 		if (name.length > LICENCE_HWID_SIZE - 4) {
 			System.arraycopy(name, 0, hwid, 4, LICENCE_HWID_SIZE - 4);
@@ -163,8 +153,8 @@ public class Licence {
 			IOException, CryptoException {
 		byte[] null_data = new byte[Secure.SEC_MODULUS_SIZE];
 		byte[] server_random = new byte[Secure.SEC_RANDOM_SIZE];
-		byte[] host = Options.hostname.getBytes("US-ASCII");
-		byte[] user = Options.username.getBytes("US-ASCII");
+		byte[] host = common.options.hostname.getBytes("US-ASCII");
+		byte[] user = common.options.username.getBytes("US-ASCII");
 
 		/* retrieve the server random */
 		data.copyToByteArray(server_random, 0, data.getPosition(),
@@ -174,7 +164,7 @@ public class Licence {
 		/* Null client keys are currently used */
 		this.generate_keys(null_data, server_random, null_data);
 
-		if (!Options.built_in_licence && Options.load_licence) {
+		if (!common.options.built_in_licence && common.options.load_licence) {
 			byte[] licence_data = load_licence();
 			if ((licence_data != null) && (licence_data.length > 0)) {
 				logger.debug("licence_data.length = " + licence_data.length);
@@ -442,8 +432,8 @@ public class Licence {
 		secure.licenceIssued = true;
 
 		/*
-		 * data.incrementPosition(2); // in_uint8s(s, 2); // pad
-		 *  // advance to fourth string length = 0; for (int i = 0; i < 4; i++) {
+		 * data.incrementPosition(2); // in_uint8s(s, 2); // pad // advance to
+		 * fourth string length = 0; for (int i = 0; i < 4; i++) {
 		 * data.incrementPosition(length); // in_uint8s(s, length); length =
 		 * data.getLittleEndian32(length); // in_uint32_le(s, length); if
 		 * (!(data.getPosition() + length <= data.getEnd())) return; }
@@ -451,7 +441,7 @@ public class Licence {
 
 		secure.licenceIssued = true;
 		logger.debug("Server issued Licence");
-		if (Options.save_licence)
+		if (common.options.save_licence)
 			save_licence(data, length - 2);
 	}
 
@@ -482,8 +472,8 @@ public class Licence {
 
 		buffer.setLittleEndian32(1);
 
-		if (Options.built_in_licence && (!Options.load_licence)
-				&& (!Options.save_licence)) {
+		if (common.options.built_in_licence && (!common.options.load_licence)
+				&& (!common.options.save_licence)) {
 			logger.debug("Using built-in Windows Licence");
 			buffer.setLittleEndian32(0x03010000);
 		} else {
@@ -588,8 +578,8 @@ public class Licence {
 		 * filepath = dirpath +"/licence."+Options.hostname;
 		 * 
 		 * File file = new File(dirpath); file.mkdir(); try{ FileOutputStream fd =
-		 * new FileOutputStream(filepath);
-		 *  // write to the licence file byte[] databytes = new byte[len];
+		 * new FileOutputStream(filepath); // write to the licence file byte[]
+		 * databytes = new byte[len];
 		 * data.copyToByteArray(databytes,0,data.getPosition(),len);
 		 * fd.write(databytes); fd.close(); logger.info("Stored licence at " +
 		 * filepath); } catch(FileNotFoundException

@@ -41,13 +41,16 @@ public abstract class LicenceStore {
 
 	static Logger logger = Logger.getLogger(Licence.class);
 
+	protected Common common;
+
 	/**
 	 * Load a licence from a file
 	 * 
 	 * @return Licence data stored in file
 	 */
 	public byte[] load_licence() {
-		String path = Options.licence_path + "/licence." + Options.hostname;
+		String path = common.options.licence_path + "/licence."
+				+ common.options.hostname;
 		byte[] data = null;
 		try {
 			FileInputStream fd = new FileInputStream(path);
@@ -70,8 +73,8 @@ public abstract class LicenceStore {
 	public void save_licence(byte[] databytes) {
 		/* set and create the directory -- if it doesn't exist. */
 		// String home = "/root";
-		String dirpath = Options.licence_path;// home+"/.rdesktop";
-		String filepath = dirpath + "/licence." + Options.hostname;
+		String dirpath = common.options.licence_path;// home+"/.rdesktop";
+		String filepath = dirpath + "/licence." + common.options.hostname;
 
 		File file = new File(dirpath);
 		file.mkdir();

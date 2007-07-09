@@ -93,8 +93,6 @@ public class RdpApplet extends Applet {
 
 	public void start() {
 
-		Common.underApplet = true;
-
 		String argLine = "";
 		argLine += genParam("-m", "keymap");
 		argLine += " " + genParam("-u", "username");
@@ -184,23 +182,23 @@ public class RdpApplet extends Applet {
 
 class RdpThread extends Thread {
 
-	String[] args;
-
-	String redirect = null;
-
-	Applet parentApplet = null;
+	private String[] args;
+	private String redirect = null;
+	private Applet parentApplet = null;
+	private Rdesktop rdesktop;
 
 	public RdpThread(String[] args, String redirect, Applet a) {
 		parentApplet = a;
 		this.args = args;
 		this.redirect = redirect;
+		this.rdesktop = new Rdesktop(true);
 	}
 
 	public void run() {
 		this.setPriority(Thread.MAX_PRIORITY);
 
 		try {
-			Rdesktop.main(args);
+			rdesktop.main_nonstatic(args);
 			if (redirect != null) {
 				URL u = new URL(redirect);
 				parentApplet.getAppletContext().showDocument(u);
@@ -213,6 +211,5 @@ class RdpThread extends Thread {
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			e.printStackTrace();
 		}
-		Common.underApplet = false;
 	}
 }

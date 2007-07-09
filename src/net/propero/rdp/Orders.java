@@ -55,83 +55,55 @@ public class Orders {
 
 	private RdesktopCanvas surface = null;
 
+	private Common common;
+
 	public static Cache cache = null;
 
 	/* RDP_BMPCACHE2_ORDER */
 	private static final int ID_MASK = 0x0007;
-
 	private static final int MODE_MASK = 0x0038;
-
 	private static final int SQUARE = 0x0080;
-
 	private static final int PERSIST = 0x0100;
-
 	private static final int FLAG_51_UNKNOWN = 0x0800;
-
 	private static final int MODE_SHIFT = 3;
-
 	private static final int LONG_FORMAT = 0x80;
-
 	private static final int BUFSIZE_MASK = 0x3FFF; /* or 0x1FFF? */
 
 	private static final int RDP_ORDER_STANDARD = 0x01;
-
 	private static final int RDP_ORDER_SECONDARY = 0x02;
-
 	private static final int RDP_ORDER_BOUNDS = 0x04;
-
 	private static final int RDP_ORDER_CHANGE = 0x08;
-
 	private static final int RDP_ORDER_DELTA = 0x10;
-
 	private static final int RDP_ORDER_LASTBOUNDS = 0x20;
-
 	private static final int RDP_ORDER_SMALL = 0x40;
-
 	private static final int RDP_ORDER_TINY = 0x80;
 
 	/* standard order types */
 	private static final int RDP_ORDER_DESTBLT = 0;
-
 	private static final int RDP_ORDER_PATBLT = 1;
-
 	private static final int RDP_ORDER_SCREENBLT = 2;
-
 	private static final int RDP_ORDER_LINE = 9;
-
 	private static final int RDP_ORDER_RECT = 10;
-
 	private static final int RDP_ORDER_DESKSAVE = 11;
-
 	private static final int RDP_ORDER_MEMBLT = 13;
-
 	private static final int RDP_ORDER_TRIBLT = 14;
-
 	private static final int RDP_ORDER_POLYLINE = 22;
-
 	private static final int RDP_ORDER_TEXT2 = 27;
 
 	private int rect_colour;
 
 	/* secondary order types */
 	private static final int RDP_ORDER_RAW_BMPCACHE = 0;
-
 	private static final int RDP_ORDER_COLCACHE = 1;
-
 	private static final int RDP_ORDER_BMPCACHE = 2;
-
 	private static final int RDP_ORDER_FONTCACHE = 3;
-
 	private static final int RDP_ORDER_RAW_BMPCACHE2 = 4;
-
 	private static final int RDP_ORDER_BMPCACHE2 = 5;
 
 	private static final int MIX_TRANSPARENT = 0;
-
 	private static final int MIX_OPAQUE = 1;
 
 	private static final int TEXT2_VERTICAL = 0x04;
-
 	private static final int TEXT2_IMPLICIT_X = 0x20;
 
 	public Orders() {
@@ -427,7 +399,7 @@ public class Orders {
 		}
 
 		cache.putBitmap(cache_id, cache_idx, new Bitmap(Bitmap.convertImage(
-				inverted, Bpp), width, height, 0, 0), 0);
+				inverted, Bpp, common), width, height, 0, 0), 0);
 	}
 
 	/**
@@ -497,7 +469,7 @@ public class Orders {
 		 * final_size
 		 */
 
-		if (Options.use_rdp5) {
+		if (common.options.use_rdp5) {
 
 			/* Begin compressedBitmapData */
 			pad2 = data.getLittleEndian16(); // in_uint16_le(s, pad2); /* pad
@@ -527,12 +499,14 @@ public class Orders {
 		if (Bpp == 1) {
 			byte[] pixel = Bitmap.decompress(width, height, size, data, Bpp);
 			if (pixel != null)
-				cache.putBitmap(cache_id, cache_idx, new Bitmap(Bitmap
-						.convertImage(pixel, Bpp), width, height, 0, 0), 0);
+				cache.putBitmap(cache_id, cache_idx,
+						new Bitmap(Bitmap.convertImage(pixel, Bpp, common),
+								width, height, 0, 0), 0);
 			else
 				logger.warn("Failed to decompress bitmap");
 		} else {
-			int[] pixel = Bitmap.decompressInt(width, height, size, data, Bpp);
+			int[] pixel = Bitmap.decompressInt(width, height, size, data, Bpp,
+					common);
 			if (pixel != null)
 				cache.putBitmap(cache_id, cache_idx, new Bitmap(pixel, width,
 						height, 0, 0), 0);
@@ -567,7 +541,7 @@ public class Orders {
 		bitmap_id = new byte[8]; /* prevent compiler warning */
 		cache_id = flags & ID_MASK;
 		Bpp = ((flags & MODE_MASK) >> MODE_SHIFT) - 2;
-		Bpp = Options.Bpp;
+		Bpp = common.options.Bpp;
 		if ((flags & PERSIST) != 0) {
 			bitmap_id = new byte[8];
 			data.copyToByteArray(bitmap_id, 0, data.getPosition(), 8);
@@ -602,10 +576,10 @@ public class Orders {
 		if (compressed) {
 			if (Bpp == 1)
 				bmpdataInt = Bitmap.convertImage(Bitmap.decompress(width,
-						height, bufsize, data, Bpp), Bpp);
+						height, bufsize, data, Bpp), Bpp, common);
 			else
 				bmpdataInt = Bitmap.decompressInt(width, height, bufsize, data,
-						Bpp);
+						Bpp, common);
 
 			if (bmpdataInt == null) {
 				logger.debug("Failed to decompress bitmap data");
@@ -631,8 +605,8 @@ public class Orders {
 			// *
 			// Bpp);
 
-			bitmap = new Bitmap(Bitmap.convertImage(bmpdata, Bpp), width,
-					height, 0, 0);
+			bitmap = new Bitmap(Bitmap.convertImage(bmpdata, Bpp, common),
+					width, height, 0, 0);
 		}
 
 		// bitmap = ui_create_bitmap(width, height, bmpdata);
@@ -642,7 +616,7 @@ public class Orders {
 			// cache_put_bitmap(cache_id, cache_idx, bitmap, 0);
 			if ((flags & PERSIST) != 0)
 				PstCache.pstcache_put_bitmap(cache_id, cache_idx, bitmap_id,
-						width, height, width * height * Bpp, bmpdata);
+						width, height, width * height * Bpp, bmpdata, common);
 		} else {
 			logger.debug("process_bmpcache2: ui_create_bitmap failed");
 		}

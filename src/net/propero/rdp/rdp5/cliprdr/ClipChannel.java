@@ -37,13 +37,14 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.io.IOException;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 import java.util.Iterator;
 
 import net.propero.rdp.Common;
 import net.propero.rdp.CommunicationMonitor;
 import net.propero.rdp.Constants;
 import net.propero.rdp.Input;
-import net.propero.rdp.Options;
 import net.propero.rdp.RdesktopException;
 import net.propero.rdp.RdpPacket;
 import net.propero.rdp.RdpPacket_Localised;
@@ -66,20 +67,14 @@ public class ClipChannel extends VChannel implements ClipInterface,
 
 	// Message types
 	public static final int CLIPRDR_CONNECT = 1;
-
 	public static final int CLIPRDR_FORMAT_ANNOUNCE = 2;
-
 	public static final int CLIPRDR_FORMAT_ACK = 3;
-
 	public static final int CLIPRDR_DATA_REQUEST = 4;
-
 	public static final int CLIPRDR_DATA_RESPONSE = 5;
 
 	// Message status codes
 	public static final int CLIPRDR_REQUEST = 0;
-
 	public static final int CLIPRDR_RESPONSE = 1;
-
 	public static final int CLIPRDR_ERROR = 2;
 
 	Clipboard clipboard;
@@ -92,14 +87,30 @@ public class ClipChannel extends VChannel implements ClipInterface,
 
 	byte[] localClipData = null;
 
-	public ClipChannel() {
-		this.clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+	public ClipChannel(Common common) {
+		super(common);
+
+		if (common.underApplet) {
+			try {
+				this.clipboard = (Clipboard) AccessController
+						.doPrivileged(new PrivilegedAction() {
+							public Object run() {
+								return Toolkit.getDefaultToolkit()
+										.getSystemClipboard();
+							}
+						});
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			this.clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		}
 
 		// initialise all clipboard format handlers
 		allHandlers = new TypeHandlerList();
 		allHandlers.add(new UnicodeHandler());
 		allHandlers.add(new TextHandler());
-		allHandlers.add(new DIBHandler());
+		allHandlers.add(new DIBHandler(common));
 		// allHandlers.add(new MetafilepictHandler());
 	}
 
@@ -266,7 +277,7 @@ public class ClipChannel extends VChannel implements ClipInterface,
 	void request_clipboard_data(int formatcode) throws RdesktopException,
 			IOException, CryptoException {
 
-		RdpPacket_Localised s = Common.secure.init(
+		RdpPacket_Localised s = common.secure.init(
 				Constants.encryption ? Secure.SEC_ENCRYPT : 0, 24);
 		s.setLittleEndian32(16); // length
 
@@ -282,7 +293,7 @@ public class ClipChannel extends VChannel implements ClipInterface,
 		s.setLittleEndian32(0); // Unknown. Garbage pad?
 		s.markEnd();
 
-		Common.secure.send_to_channel(s,
+		common.secure.send_to_channel(s,
 				Constants.encryption ? Secure.SEC_ENCRYPT : 0, this.mcs_id());
 	}
 
@@ -303,20 +314,11 @@ public class ClipChannel extends VChannel implements ClipInterface,
 
 		try {
 			this.send_packet(all);
-		} catch (RdesktopException e) {
+		} catch (Exception e) { // catch exceptions: RdesktopException,
+			// IOException, CryptoException
 			System.err.println(e.getMessage());
 			e.printStackTrace();
-			if (!Common.underApplet)
-				System.exit(-1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
-			if (!Common.underApplet)
-				System.exit(-1);
-		} catch (CryptoException e) {
-			System.err.println(e.getMessage());
-			e.printStackTrace();
-			if (!Common.underApplet)
+			if (!common.underApplet)
 				System.exit(-1);
 		}
 
@@ -329,7 +331,7 @@ public class ClipChannel extends VChannel implements ClipInterface,
 	public void focusGained(FocusEvent arg0) {
 		// synchronise the clipboard types here, so the server knows what's
 		// available
-		if (Options.use_rdp5) {
+		if (common.options.use_rdp5) {
 			try {
 				send_format_announce();
 			} catch (RdesktopException e) {

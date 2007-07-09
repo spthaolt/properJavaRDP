@@ -47,40 +47,37 @@ public class MCS {
 
 	/* this for the MCS Layer */
 	private static final int CONNECT_INITIAL = 0x7f65;
-
 	private static final int CONNECT_RESPONSE = 0x7f66;
 
 	private static final int BER_TAG_BOOLEAN = 1;
-
 	private static final int BER_TAG_INTEGER = 2;
-
 	private static final int BER_TAG_OCTET_STRING = 4;
-
 	private static final int BER_TAG_RESULT = 10;
 
 	private static final int TAG_DOMAIN_PARAMS = 0x30;
 
 	public static final int MCS_GLOBAL_CHANNEL = 1003;
-
 	public static final int MCS_USERCHANNEL_BASE = 1001;
 
 	private static final int EDRQ = 1; /* Erect Domain Request */
-
 	private static final int DPUM = 8; /* Disconnect Provider Ultimatum */
-
 	private static final int AURQ = 10; /* Attach User Request */
-
 	private static final int AUCF = 11; /* Attach User Confirm */
-
 	private static final int CJRQ = 14; /* Channel Join Request */
-
 	private static final int CJCF = 15; /* Channel Join Confirm */
-
 	private static final int SDRQ = 25; /* Send Data Request */
-
 	private static final int SDIN = 26; /* Send Data Indication */
 
 	private VChannels channels;
+
+	private Common common;
+
+	/**
+	 * catch the implicit non-common constructor references
+	 */
+	private MCS() {
+
+	}
 
 	/**
 	 * Initialise the MCS layer (and lower layers) with provided channels
@@ -88,9 +85,10 @@ public class MCS {
 	 * @param channels
 	 *            Set of available MCS channels
 	 */
-	public MCS(VChannels channels) {
+	public MCS(VChannels channels, Common common) {
 		this.channels = channels;
-		IsoLayer = new ISO_Localised();
+		this.common = common;
+		IsoLayer = new ISO_Localised(common);
 	}
 
 	/**
@@ -501,7 +499,7 @@ public class MCS {
 		parseDomainParams(buffer);
 		length = berParseHeader(buffer, BER_TAG_OCTET_STRING);
 
-		Common.secure.processMcsData(buffer);
+		common.secure.processMcsData(buffer);
 
 		/*
 		 * if (length > data.size()) { logger.warn("MCS Datalength exceeds

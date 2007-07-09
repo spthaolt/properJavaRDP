@@ -86,9 +86,9 @@ public class Input_Localised extends Input {
 		// doesn't work on Java 1.4.1_02 or 1.4.2 on Linux, there is a bug in
 		// java....
 		// does work on the same version on Windows.
-		if (!Rdesktop.readytosend)
+		if (!rdp.common.rdesktop.readytosend)
 			return;
-		if (!Options.useLockingKeyState)
+		if (!rdp.common.options.useLockingKeyState)
 			return;
 		if (Constants.OS == Constants.LINUX)
 			return; // broken for linux
@@ -119,7 +119,7 @@ public class Input_Localised extends Input {
 				sendScancode(getTime(), RDP_KEYRELEASE, 0x46);
 			}
 		} catch (Exception e) {
-			Options.useLockingKeyState = false;
+			rdp.common.options.useLockingKeyState = false;
 		}
 	}
 

@@ -43,8 +43,8 @@ import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import net.propero.rdp.Common;
 import net.propero.rdp.Input;
-import net.propero.rdp.Options;
 
 import org.apache.log4j.Logger;
 
@@ -78,12 +78,16 @@ public abstract class KeyCode_FileBased {
 
 	Vector keyMap = new Vector();
 
+	protected Common common;
+
 	private void updateCapsLock(KeyEvent e) {
 
 	}
 
-	public KeyCode_FileBased(InputStream fstream) throws KeyMapException {
+	public KeyCode_FileBased(InputStream fstream, Common common)
+			throws KeyMapException {
 		readMapFile(fstream);
+		this.common = common;
 	}
 
 	/**
@@ -93,8 +97,10 @@ public abstract class KeyCode_FileBased {
 	 * @param keyMapFile
 	 *            File containing keymap data
 	 */
-	public KeyCode_FileBased(String keyMapFile) throws KeyMapException {
+	public KeyCode_FileBased(String keyMapFile, Common common)
+			throws KeyMapException {
 		// logger.info("String called keycode reader");
+		this.common = common;
 
 		FileInputStream fstream;
 		try {
@@ -296,7 +302,7 @@ public abstract class KeyCode_FileBased {
 				changes += ((char) 0x1d) + down;
 		}
 
-		if (Options.altkey_quiet) {
+		if (common.options.altkey_quiet) {
 
 			if (state[ALT][BEFORE] != state[ALT][AFTER]) {
 				if (state[ALT][BEFORE])
@@ -459,7 +465,7 @@ public abstract class KeyCode_FileBased {
 			if ((e.getID() == KeyEvent.KEY_PRESSED)) {
 				applies = current.appliesToPressed(e);
 			} else if ((!lastEventMatched) && (e.getID() == KeyEvent.KEY_TYPED)) {
-				applies = current.appliesToTyped(e, capsLockDown);
+				applies = current.appliesToTyped(e, capsLockDown, common);
 			} else
 				applies = false;
 
@@ -506,7 +512,7 @@ public abstract class KeyCode_FileBased {
 
 		if (e.getID() == KeyEvent.KEY_RELEASED) {
 			keysCurrentlyDown.remove(new Integer(e.getKeyCode()));
-			if ((!Options.caps_sends_up_and_down)
+			if ((!common.options.caps_sends_up_and_down)
 					&& (e.getKeyCode() == KeyEvent.VK_CAPS_LOCK)) {
 				logger.debug("Turning CAPSLOCK off - key release");
 				capsLockDown = false;
@@ -520,7 +526,7 @@ public abstract class KeyCode_FileBased {
 				lastEventMatched = true;
 			else
 				lastEventMatched = false;
-			if ((Options.caps_sends_up_and_down)
+			if ((common.options.caps_sends_up_and_down)
 					&& (e.getKeyCode() == KeyEvent.VK_CAPS_LOCK)) {
 				logger.debug("Toggling CAPSLOCK");
 				capsLockDown = !capsLockDown;
@@ -561,7 +567,7 @@ public abstract class KeyCode_FileBased {
 		String type = "";
 
 		if (e.getID() == KeyEvent.KEY_RELEASED) {
-			if ((!Options.caps_sends_up_and_down)
+			if ((!common.options.caps_sends_up_and_down)
 					&& (e.getKeyCode() == KeyEvent.VK_CAPS_LOCK)) {
 				logger.debug("Sending CAPSLOCK toggle");
 				codes = "" + ((char) 0x3a) + ((char) DOWN) + ((char) 0x3a)
@@ -571,7 +577,7 @@ public abstract class KeyCode_FileBased {
 				codes = ((char) d.getScancode()) + type + codes;
 			}
 		} else {
-			if ((!Options.caps_sends_up_and_down)
+			if ((!common.options.caps_sends_up_and_down)
 					&& (e.getKeyCode() == KeyEvent.VK_CAPS_LOCK)) {
 				logger.debug("Sending CAPSLOCK toggle");
 				codes += "" + ((char) 0x3a) + ((char) DOWN) + ((char) 0x3a)

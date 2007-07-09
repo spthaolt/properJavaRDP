@@ -46,7 +46,17 @@ import org.apache.log4j.Logger;
 
 public class DIBHandler extends TypeHandler implements ImageObserver {
 
+	private Common common = null;
+
 	protected static Logger logger = Logger.getLogger(Input.class);
+
+	public DIBHandler(Common common) {
+		this.common = common;
+	}
+
+	private DIBHandler() {
+
+	}
 
 	public boolean formatValid(int format) {
 		return (format == CF_DIB);
@@ -88,7 +98,7 @@ public class DIBHandler extends TypeHandler implements ImageObserver {
 					mediaTracker.waitForID(0);
 				} catch (InterruptedException ie) {
 					System.err.println(ie);
-					if (!Common.underApplet)
+					if (!common.underApplet)
 						System.exit(1);
 				}
 				if (img == null)

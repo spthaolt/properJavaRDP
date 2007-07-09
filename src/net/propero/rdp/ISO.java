@@ -47,31 +47,32 @@ public abstract class ISO {
 	private HexDump dump = null;
 
 	protected Socket rdpsock = null;
-
 	private DataInputStream in = null;
-
 	private DataOutputStream out = null;
+
+	private Common common = null;
 
 	/* this for the ISO Layer */
 	private static final int CONNECTION_REQUEST = 0xE0;
-
 	private static final int CONNECTION_CONFIRM = 0xD0;
-
 	private static final int DISCONNECT_REQUEST = 0x80;
-
 	private static final int DATA_TRANSFER = 0xF0;
-
 	private static final int ERROR = 0x70;
-
 	private static final int PROTOCOL_VERSION = 0x03;
-
 	private static final int EOT = 0x80;
+
+	/**
+	 * catch the implicit non-common constructor references
+	 */
+	private ISO() {
+	}
 
 	/**
 	 * Construct ISO object, initialises hex dump
 	 */
-	public ISO() {
+	public ISO(Common argCommon) {
 		dump = new HexDump();
+		this.common = argCommon;
 	}
 
 	/**
@@ -122,7 +123,7 @@ public abstract class ISO {
 			RdesktopException, OrderException, CryptoException {
 		int[] code = new int[1];
 		doSocketConnect(host, port);
-		rdpsock.setTcpNoDelay(Options.low_latency);
+		rdpsock.setTcpNoDelay(common.options.low_latency);
 		// this.in = new InputStreamReader(rdpsock.getInputStream());
 		this.in = new DataInputStream(new BufferedInputStream(rdpsock
 				.getInputStream()));
@@ -167,7 +168,7 @@ public abstract class ISO {
 		buffer.setBigEndian16(0); // Destination reference ( 0 at CC and DR)
 
 		buffer.setBigEndian16(0); // source reference should be a reasonable
-									// address we use 0
+		// address we use 0
 		buffer.set8(0); // service class
 		buffer.copyToByteArray(packet, 0, 0, packet.length);
 		out.write(packet);
@@ -201,7 +202,7 @@ public abstract class ISO {
 			buffer.set8(DATA_TRANSFER);
 			buffer.set8(EOT);
 			buffer.copyToByteArray(packet, 0, 0, buffer.getEnd());
-			if (Options.debug_hexdump)
+			if (common.options.debug_hexdump)
 				dump.encode(packet, "SEND"/* System.out */);
 			out.write(packet);
 			out.flush();
@@ -255,7 +256,7 @@ public abstract class ISO {
 		// try{ }
 		// catch(IOException e){ logger.warn("IOException: " + e.getMessage());
 		// return null; }
-		if (Options.debug_hexdump)
+		if (common.options.debug_hexdump)
 			dump.encode(packet, "RECEIVE" /* System.out */);
 
 		if (p == null) {
@@ -317,7 +318,7 @@ public abstract class ISO {
 				return null;
 			if ((version & 3) == 0) {
 				logger.debug("Processing rdp5 packet");
-				Common.rdp.rdp5_process(s, (version & 0x80) != 0);
+				common.rdp.rdp5_process(s, (version & 0x80) != 0);
 				continue next_packet;
 			} else
 				break;
@@ -368,12 +369,13 @@ public abstract class ISO {
 	 */
 	void send_connection_request() throws IOException {
 
-		String uname = Options.username;
+		String uname = common.options.username;
 		if (uname.length() > 9)
 			uname = uname.substring(0, 9);
-		int length = 11 + (Options.username.length() > 0 ? ("Cookie: mstshash="
+		int length = 11 + (common.options.username.length() > 0 ? ("Cookie: mstshash="
 				.length()
-				+ uname.length() + 2) : 0) + 8;
+				+ uname.length() + 2)
+				: 0) + 8;
 		RdpPacket_Localised buffer = new RdpPacket_Localised(length);
 		byte[] packet = new byte[length];
 
@@ -384,9 +386,9 @@ public abstract class ISO {
 		buffer.set8(CONNECTION_REQUEST);
 		buffer.setBigEndian16(0); // Destination reference ( 0 at CC and DR)
 		buffer.setBigEndian16(0); // source reference should be a reasonable
-									// address we use 0
+		// address we use 0
 		buffer.set8(0); // service class
-		if (Options.username.length() > 0) {
+		if (common.options.username.length() > 0) {
 			logger.debug("Including username");
 			buffer
 					.out_uint8p("Cookie: mstshash=", "Cookie: mstshash="

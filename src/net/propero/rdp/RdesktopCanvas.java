@@ -70,6 +70,8 @@ public abstract class RdesktopCanvas extends Canvas {
 
 	// unsetBusyCursor
 
+	public Common common = null;
+
 	private Input input = null;
 
 	public static final int ROP2_COPY = 0xc;
@@ -127,13 +129,14 @@ public abstract class RdesktopCanvas extends Canvas {
 	 * @param height
 	 *            Desired height of canvas
 	 */
-	public RdesktopCanvas(int width, int height) {
+	public RdesktopCanvas(int width, int height, Common common) {
 		super();
-		rop = new RasterOp();
+		rop = new RasterOp(common);
 		this.width = width;
 		this.height = height;
 		this.right = width - 1; // changed
 		this.bottom = height - 1; // changed
+		this.common = common;
 		setSize(width, height);
 
 		backstore = new WrappedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -225,7 +228,7 @@ public abstract class RdesktopCanvas extends Canvas {
 			int size, RdpPacket_Localised data, int Bpp, IndexColorModel cm)
 			throws RdesktopException {
 		backstore = Bitmap.decompressImgDirect(width, height, size, data, Bpp,
-				cm, x, y, backstore);
+				cm, x, y, backstore, common);
 	}
 
 	/**
@@ -395,10 +398,10 @@ public abstract class RdesktopCanvas extends Canvas {
 		if (x > this.right || y > this.bottom)
 			return; // off screen
 
-		int Bpp = Options.Bpp;
+		int Bpp = common.options.Bpp;
 
 		// convert to 24-bit colour
-		color = Bitmap.convertTo24(color);
+		color = Bitmap.convertTo24(color, common);
 
 		// correction for 24-bit colour
 		if (Bpp == 3)
@@ -453,7 +456,7 @@ public abstract class RdesktopCanvas extends Canvas {
 	 */
 	public void drawLine(int x1, int y1, int x2, int y2, int color, int opcode) {
 		// convert to 24-bit colour
-		color = Bitmap.convertTo24(color);
+		color = Bitmap.convertTo24(color, common);
 
 		if (x1 == x2 || y1 == y2) {
 			drawLineVerticalHorizontal(x1, y1, x2, y2, color, opcode);
@@ -773,8 +776,8 @@ public abstract class RdesktopCanvas extends Canvas {
 			int fgcolor, int bgcolor, Brush brush) {
 
 		// convert to 24-bit colour
-		fgcolor = Bitmap.convertTo24(fgcolor);
-		bgcolor = Bitmap.convertTo24(bgcolor);
+		fgcolor = Bitmap.convertTo24(fgcolor, common);
+		bgcolor = Bitmap.convertTo24(bgcolor, common);
 
 		// Perform standard clipping checks, x-axis
 		int clipright = x + cx - 1;
@@ -888,8 +891,8 @@ public abstract class RdesktopCanvas extends Canvas {
 		Brush brush = triblt.getBrush();
 
 		// convert to 24-bit colour
-		fgcolor = Bitmap.convertTo24(fgcolor);
-		bgcolor = Bitmap.convertTo24(bgcolor);
+		fgcolor = Bitmap.convertTo24(fgcolor, common);
+		bgcolor = Bitmap.convertTo24(bgcolor, common);
 
 		// Perform standard clipping checks, x-axis
 		int clipright = x + cx - 1;
@@ -976,7 +979,7 @@ public abstract class RdesktopCanvas extends Canvas {
 		int lines = polyline.getLines();
 
 		// convert to 24-bit colour
-		fgcolor = Bitmap.convertTo24(fgcolor);
+		fgcolor = Bitmap.convertTo24(fgcolor, common);
 
 		// hack - data as single element byte array so can pass by ref to
 		// parse_delta
@@ -1037,7 +1040,7 @@ public abstract class RdesktopCanvas extends Canvas {
 	 *            Colour value to be used in operation
 	 */
 	public void setPixel(int opcode, int x, int y, int color) {
-		int Bpp = Options.Bpp;
+		int Bpp = common.options.Bpp;
 
 		// correction for 24-bit colour
 		if (Bpp == 3)
@@ -1081,11 +1084,11 @@ public abstract class RdesktopCanvas extends Canvas {
 		int bytes_per_row = (cx - 1) / 8 + 1;
 		int newx, newy, newcx, newcy;
 
-		int Bpp = Options.Bpp;
+		int Bpp = common.options.Bpp;
 
 		// convert to 24-bit colour
-		fgcolor = Bitmap.convertTo24(fgcolor);
-		bgcolor = Bitmap.convertTo24(bgcolor);
+		fgcolor = Bitmap.convertTo24(fgcolor, common);
+		bgcolor = Bitmap.convertTo24(bgcolor, common);
 
 		// correction for 24-bit colour
 		if (Bpp == 3) {

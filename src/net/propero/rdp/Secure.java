@@ -47,48 +47,31 @@ import org.apache.log4j.Logger;
 
 public class Secure {
 	boolean readCert = false;
-
 	static Logger logger = Logger.getLogger(Secure.class);
-
-	private Licence licence = new Licence(this);
+	private Licence licence;
 
 	/* constants for the secure layer */
 	public static final int SEC_ENCRYPT = 0x0008;
-
 	public static final int SEC_LOGON_INFO = 0x0040;
 
 	static final int SEC_RANDOM_SIZE = 32;
-
 	static final int SEC_MODULUS_SIZE = 64;
-
 	static final int SEC_PADDING_SIZE = 8;
-
 	private static final int SEC_EXPONENT_SIZE = 4;
 
 	private static final int SEC_CLIENT_RANDOM = 0x0001;
-
 	static final int SEC_LICENCE_NEG = 0x0080;
 
 	private static final int SEC_TAG_SRV_INFO = 0x0c01;
-
 	private static final int SEC_TAG_SRV_CRYPT = 0x0c02;
-
 	private static final int SEC_TAG_SRV_3 = 0x0c03;
-
 	private static final int SEC_TAG_SRV_CHANNELS = 0x0c03;
-
 	private static final int SEC_TAG_CLI_INFO = 0xc001;
-
 	private static final int SEC_TAG_CLI_CRYPT = 0xc002;
-
 	private static final int SEC_TAG_CLI_CHANNELS = 0xc003;
-
 	private static final int SEC_TAG_CLI_4 = 0xc004;
-
 	private static final int SEC_TAG_PUBKEY = 0x0006;
-
 	private static final int SEC_TAG_KEYSIG = 0x0008;
-
 	private static final int SEC_RSA_MAGIC = 0x31415352; /* RSA1 */
 
 	private MCS McsLayer = null;
@@ -96,41 +79,28 @@ public class Secure {
 	// private String hostname=null;
 	// private String username=null;
 	boolean licenceIssued = false;
-
 	private RC4 rc4_enc = null;
-
 	private RC4 rc4_dec = null;
-
 	private RC4 rc4_update = null;
-
 	private BlockMessageDigest sha1 = null;
-
 	private BlockMessageDigest md5 = null;
-
 	private int keylength = 0;
-
 	private int enc_count = 0;
-
 	private int dec_count = 0;
 
 	private byte[] sec_sign_key = null;
 
 	private byte[] sec_decrypt_key = null;
-
 	private byte[] sec_encrypt_key = null;
 
 	private byte[] sec_decrypt_update_key = null;
-
 	private byte[] sec_encrypt_update_key = null;
 
 	private byte[] sec_crypted_random = null;
 
 	private byte[] exponent = null;
-
 	private byte[] modulus = null;
-
 	private byte[] server_random = null;
-
 	private byte[] client_random = new byte[SEC_RANDOM_SIZE];
 
 	private static final byte[] pad_54 = { 54, 54, 54, 54, 54, 54, 54, 54, 54,
@@ -144,16 +114,27 @@ public class Secure {
 
 	private VChannels channels;
 
+	private Common common;
+
+	/**
+	 * catch the implicit non-common constructor references
+	 */
+	private Secure() {
+
+	}
+
 	/**
 	 * Initialise Secure layer of communications
 	 * 
 	 * @param channels
 	 *            Virtual channels for this connection
 	 */
-	public Secure(VChannels channels) {
+	public Secure(VChannels channels, Common common) {
 		this.channels = channels;
-		McsLayer = new MCS(channels);
-		Common.mcs = McsLayer;
+		this.common = common;
+		licence = new Licence(this, common);
+		McsLayer = new MCS(channels, common);
+		this.common.mcs = McsLayer;
 		rc4_dec = new RC4();
 		rc4_enc = new RC4();
 		rc4_update = new RC4();
@@ -163,9 +144,9 @@ public class Secure {
 		sec_decrypt_key = new byte[16];
 		sec_encrypt_key = new byte[16];
 		sec_decrypt_update_key = new byte[16]; // changed from 8 - rdesktop
-												// 1.2.0
+		// 1.2.0
 		sec_encrypt_update_key = new byte[16]; // changed from 8 - rdesktop
-												// 1.2.0
+		// 1.2.0
 		sec_crypted_random = new byte[64];
 
 	}
@@ -187,12 +168,12 @@ public class Secure {
 	public void connect(InetAddress host, int port)
 			throws UnknownHostException, IOException, RdesktopException,
 			SocketException, CryptoException, OrderException {
-		if (Options.hostname == "") {
+		if (common.options.hostname == "") {
 			InetAddress localhost = InetAddress.getLocalHost();
 			String name = localhost.getHostName();
 			StringTokenizer tok = new StringTokenizer(name, ".");
-			Options.hostname = tok.nextToken();
-			Options.hostname.trim();
+			common.options.hostname = tok.nextToken();
+			common.options.hostname.trim();
 		}
 
 		RdpPacket_Localised mcs_data = this.sendMcsData();
@@ -217,7 +198,7 @@ public class Secure {
 	 */
 	public void connect(InetAddress host) throws IOException,
 			RdesktopException, OrderException, CryptoException {
-		this.connect(host, Options.port);
+		this.connect(host, common.options.port);
 	}
 
 	/**
@@ -237,7 +218,7 @@ public class Secure {
 
 		RdpPacket_Localised buffer = new RdpPacket_Localised(512);
 
-		int hostlen = 2 * (Options.hostname == null ? 0 : Options.hostname
+		int hostlen = 2 * (common.options.hostname == null ? 0 : common.options.hostname
 				.length());
 
 		if (hostlen > 30) {
@@ -245,10 +226,10 @@ public class Secure {
 		}
 
 		int length = 158;
-		if (Options.use_rdp5)
+		if (common.options.use_rdp5)
 			length += 76 + 12 + 4;
 
-		if (Options.use_rdp5 && (channels.num_channels() > 0))
+		if (common.options.use_rdp5 && (channels.num_channels() > 0))
 			length += channels.num_channels() * 12 + 8;
 
 		buffer.setBigEndian16(5); /* unknown */
@@ -269,23 +250,23 @@ public class Secure {
 
 		// Client information
 		buffer.setLittleEndian16(SEC_TAG_CLI_INFO);
-		buffer.setLittleEndian16(Options.use_rdp5 ? 212 : 136); // length
-		buffer.setLittleEndian16(Options.use_rdp5 ? 4 : 1);
+		buffer.setLittleEndian16(common.options.use_rdp5 ? 212 : 136); // length
+		buffer.setLittleEndian16(common.options.use_rdp5 ? 4 : 1);
 		buffer.setLittleEndian16(8);
-		buffer.setLittleEndian16(Options.width);
-		buffer.setLittleEndian16(Options.height);
+		buffer.setLittleEndian16(common.options.width);
+		buffer.setLittleEndian16(common.options.height);
 		buffer.setLittleEndian16(0xca01);
 		buffer.setLittleEndian16(0xaa03);
-		buffer.setLittleEndian32(Options.keylayout);
-		buffer.setLittleEndian32(Options.use_rdp5 ? 2600 : 419); // or 0ece
-																	// // client
-																	// build? we
-																	// are 2600
-																	// compatible
-																	// :-)
+		buffer.setLittleEndian32(common.options.keylayout);
+		buffer.setLittleEndian32(common.options.use_rdp5 ? 2600 : 419); // or 0ece
+		// // client
+		// build? we
+		// are 2600
+		// compatible
+		// :-)
 
 		/* Unicode name of client, padded to 32 bytes */
-		buffer.outUnicodeString(Options.hostname.toUpperCase(), hostlen);
+		buffer.outUnicodeString(common.options.hostname.toUpperCase(), hostlen);
 		buffer.incrementPosition(30 - hostlen);
 
 		buffer.setLittleEndian32(4);
@@ -294,11 +275,11 @@ public class Secure {
 		buffer.incrementPosition(64); /* reserved? 4 + 12 doublewords */
 
 		buffer.setLittleEndian16(0xca01); // out_uint16_le(s, 0xca01);
-		buffer.setLittleEndian16(Options.use_rdp5 ? 1 : 0);
+		buffer.setLittleEndian16(common.options.use_rdp5 ? 1 : 0);
 
-		if (Options.use_rdp5) {
+		if (common.options.use_rdp5) {
 			buffer.setLittleEndian32(0); // out_uint32(s, 0);
-			buffer.set8(Options.server_bpp); // out_uint8(s, g_server_bpp);
+			buffer.set8(common.options.server_bpp); // out_uint8(s, g_server_bpp);
 			buffer.setLittleEndian16(0x0700); // out_uint16_le(s, 0x0700);
 			buffer.set8(0); // out_uint8(s, 0);
 			buffer.setLittleEndian32(1); // out_uint32_le(s, 1);
@@ -306,55 +287,55 @@ public class Secure {
 			buffer.incrementPosition(64);
 
 			buffer.setLittleEndian16(SEC_TAG_CLI_4); // out_uint16_le(s,
-														// SEC_TAG_CLI_4);
+			// SEC_TAG_CLI_4);
 			buffer.setLittleEndian16(12); // out_uint16_le(s, 12);
-			buffer.setLittleEndian32(Options.console_session ? 0xb : 0xd); // out_uint32_le(s,
-																			// g_console_session
-																			// ?
-																			// 0xb
-																			// :
-																			// 9);
+			buffer.setLittleEndian32(common.options.console_session ? 0xb : 0xd); // out_uint32_le(s,
+			// g_console_session
+			// ?
+			// 0xb
+			// :
+			// 9);
 			buffer.setLittleEndian32(0); // out_uint32(s, 0);
 		}
 
 		// Client encryption settings //
 		buffer.setLittleEndian16(SEC_TAG_CLI_CRYPT);
-		buffer.setLittleEndian16(Options.use_rdp5 ? 12 : 8); // length
+		buffer.setLittleEndian16(common.options.use_rdp5 ? 12 : 8); // length
 
-		// if(Options.use_rdp5) buffer.setLittleEndian32(Options.encryption ?
+		// if(common.options.use_rdp5) buffer.setLittleEndian32(common.options.encryption ?
 		// 0x1b : 0); // 128-bit encryption supported
 		// else
 		buffer
-				.setLittleEndian32(Options.encryption ? (Options.console_session ? 0xb
+				.setLittleEndian32(common.options.encryption ? (common.options.console_session ? 0xb
 						: 0x3)
 						: 0);
 
-		if (Options.use_rdp5)
+		if (common.options.use_rdp5)
 			buffer.setLittleEndian32(0); // unknown
 
-		if (Options.use_rdp5 && (channels.num_channels() > 0)) {
+		if (common.options.use_rdp5 && (channels.num_channels() > 0)) {
 			logger.debug(("num_channels is " + channels.num_channels()));
 			buffer.setLittleEndian16(SEC_TAG_CLI_CHANNELS); // out_uint16_le(s,
-															// SEC_TAG_CLI_CHANNELS);
+			// SEC_TAG_CLI_CHANNELS);
 			buffer.setLittleEndian16(channels.num_channels() * 12 + 8); // out_uint16_le(s,
-																		// g_num_channels
-																		// * 12
-																		// + 8);
-																		// //
-																		// length
+			// g_num_channels
+			// * 12
+			// + 8);
+			// //
+			// length
 			buffer.setLittleEndian32(channels.num_channels()); // out_uint32_le(s,
-																// g_num_channels);
-																// // number of
-																// virtual
-																// channels
+			// g_num_channels);
+			// // number of
+			// virtual
+			// channels
 			for (int i = 0; i < channels.num_channels(); i++) {
 				logger.debug(("Requesting channel " + channels.channel(i)
 						.name()));
 				buffer.out_uint8p(channels.channel(i).name(), 8); // out_uint8a(s,
-																	// g_channels[i].name,
-																	// 8);
+				// g_channels[i].name,
+				// 8);
 				buffer.setBigEndian32(channels.channel(i).flags()); // out_uint32_be(s,
-																	// g_channels[i].flags);
+				// g_channels[i].flags);
 			}
 		}
 
@@ -420,11 +401,11 @@ public class Secure {
 	 *            Packet to read
 	 */
 	private void processSrvInfo(RdpPacket_Localised mcs_data) {
-		Options.server_rdp_version = mcs_data.getLittleEndian16(); // in_uint16_le(s,
-																	// g_server_rdp_version);
-		logger.debug(("Server RDP version is " + Options.server_rdp_version));
-		if (1 == Options.server_rdp_version)
-			Options.use_rdp5 = false;
+		common.options.server_rdp_version = mcs_data.getLittleEndian16(); // in_uint16_le(s,
+		// g_server_rdp_version);
+		logger.debug(("Server RDP version is " + common.options.server_rdp_version));
+		if (1 == common.options.server_rdp_version)
+			common.options.use_rdp5 = false;
 	}
 
 	public void establishKey() throws RdesktopException, IOException,
@@ -552,8 +533,7 @@ public class Secure {
 		byte[] data;
 		byte[] buffer;
 
-		sec_data.setPosition(sec_data
-				.getHeader(RdpPacket.SECURE_HEADER));
+		sec_data.setPosition(sec_data.getHeader(RdpPacket.SECURE_HEADER));
 
 		if (this.licenceIssued == false || (flags & SEC_ENCRYPT) != 0) {
 			sec_data.setLittleEndian32(flags);
@@ -748,7 +728,7 @@ public class Secure {
 
 		rc4_key_size = data.getLittleEndian32(); // 1 = 40-Bit 2 = 128 Bit
 		encryption_level = data.getLittleEndian32(); // 1 = low, 2 = medium,
-														// 3 = high
+		// 3 = high
 		if (encryption_level == 0) { // no encryption
 			return 0;
 		}
@@ -773,8 +753,8 @@ public class Secure {
 
 		// data.incrementPosition(12); // unknown bytes
 		int flags = data.getLittleEndian32(); // in_uint32_le(s, flags); // 1
-												// = RDP4-style, 0x80000002 =
-												// X.509
+		// = RDP4-style, 0x80000002 =
+		// X.509
 		logger.debug("Flags = 0x" + Integer.toHexString(flags));
 		if ((flags & 1) != 0) {
 			logger.debug(("We're going for the RDP4-style encryption"));
@@ -1050,20 +1030,20 @@ public class Secure {
 	public byte[] update(byte[] key, byte[] update_key) throws CryptoException {
 		byte[] shasig = new byte[20];
 		byte[] update = new byte[this.keylength]; // changed from 8 - rdesktop
-													// 1.2.0
+		// 1.2.0
 		byte[] thekey = new byte[key.length];
 
 		sha1.engineReset();
 		sha1.engineUpdate(update_key, 0, keylength);
 		sha1.engineUpdate(pad_54, 0, 40);
 		sha1.engineUpdate(key, 0, keylength); // changed from 8 - rdesktop
-												// 1.2.0
+		// 1.2.0
 		shasig = sha1.engineDigest();
 		sha1.engineReset();
 
 		md5.engineReset();
 		md5.engineUpdate(update_key, 0, keylength); // changed from 8 - rdesktop
-													// 1.2.0
+		// 1.2.0
 		md5.engineUpdate(pad_92, 0, 48);
 		md5.engineUpdate(shasig, 0, 20);
 		thekey = md5.engineDigest();
@@ -1172,9 +1152,9 @@ public class Secure {
 				this.server_random, 88);
 
 		System.arraycopy(session_key, 0, this.sec_sign_key, 0, 16); // changed
-																	// from 8 -
-																	// rdesktop
-																	// 1.2.0
+		// from 8 -
+		// rdesktop
+		// 1.2.0
 
 		this.sec_decrypt_key = this.hash16(session_key, this.client_random,
 				this.server_random, 16);

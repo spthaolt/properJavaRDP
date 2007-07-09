@@ -35,9 +35,18 @@ import org.apache.log4j.Logger;
 public class RasterOp {
 	static Logger logger = Logger.getLogger(RdesktopCanvas.class);
 
+	private Common common;
+
+	private RasterOp() {
+	}
+
+	public RasterOp(Common common) {
+		this.common = common;
+	}
+
 	private void ropInvert(WrappedImage biDst, int[] dest, int width, int x,
 			int y, int cx, int cy, int Bpp) {
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int pdest = (y * width + x);
 		for (int i = 0; i < cy; i++) {
 			for (int j = 0; j < cx; j++) {
@@ -64,7 +73,7 @@ public class RasterOp {
 	private void ropSet(WrappedImage biDst, int width, int x, int y, int cx,
 			int cy, int Bpp) {
 
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 
 		for (int i = x; i < x + cx; i++) {
 			for (int j = y; j < y + cy; j++)
@@ -113,7 +122,7 @@ public class RasterOp {
 	 */
 	public void do_array(int opcode, WrappedImage biDst, int dstwidth, int x,
 			int y, int cx, int cy, int[] src, int srcwidth, int srcx, int srcy) {
-		int Bpp = Options.Bpp;
+		int Bpp = common.options.Bpp;
 		// int[] dst = null;
 		// System.out.println("do_array: opcode = 0x" +
 		// Integer.toHexString(opcode) );
@@ -199,7 +208,7 @@ public class RasterOp {
 	 *            Colour to use in operation (unused for some operations)
 	 */
 	public void do_pixel(int opcode, WrappedImage dst, int x, int y, int color) {
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 
 		if (dst == null)
 			return;
@@ -262,7 +271,7 @@ public class RasterOp {
 	private void ropNor(WrappedImage biDst, int dstwidth, int x, int y, int cx,
 			int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x1
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 
 		for (int row = 0; row < cy; row++) {
@@ -277,7 +286,7 @@ public class RasterOp {
 	private void ropAndInverted(WrappedImage biDst, int dstwidth, int x, int y,
 			int cx, int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x2
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -292,7 +301,7 @@ public class RasterOp {
 	private void ropXor(WrappedImage biDst, int dstwidth, int x, int y, int cx,
 			int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x6
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -307,7 +316,7 @@ public class RasterOp {
 	private void ropNand(WrappedImage biDst, int dstwidth, int x, int y,
 			int cx, int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x7
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -322,7 +331,7 @@ public class RasterOp {
 	private void ropAnd(WrappedImage biDst, int dstwidth, int x, int y, int cx,
 			int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x8
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -337,7 +346,7 @@ public class RasterOp {
 	private void ropEquiv(WrappedImage biDst, int dstwidth, int x, int y,
 			int cx, int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0x9
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -352,7 +361,7 @@ public class RasterOp {
 	private void ropOrInverted(WrappedImage biDst, int dstwidth, int x, int y,
 			int cx, int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0xb
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {
@@ -367,7 +376,7 @@ public class RasterOp {
 	private void ropOr(WrappedImage biDst, int dstwidth, int x, int y, int cx,
 			int cy, int[] src, int srcwidth, int srcx, int srcy, int Bpp) {
 		// opcode 0xe
-		int mask = Options.bpp_mask;
+		int mask = common.options.bpp_mask;
 		int psrc = (srcy * srcwidth + srcx);
 		for (int row = 0; row < cy; row++) {
 			for (int col = 0; col < cx; col++) {

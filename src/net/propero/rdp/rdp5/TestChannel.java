@@ -29,6 +29,7 @@
  */
 package net.propero.rdp.rdp5;
 
+import net.propero.rdp.Common;
 import net.propero.rdp.RdpPacket;
 
 /**
@@ -39,7 +40,8 @@ import net.propero.rdp.RdpPacket;
  */
 public class TestChannel extends VChannel {
 
-	public TestChannel(String name, int flags) {
+	public TestChannel(String name, int flags, Common common) {
+		super(common);
 		this.name = name;
 		this.flags = flags;
 	}

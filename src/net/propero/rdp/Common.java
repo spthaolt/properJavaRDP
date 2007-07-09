@@ -34,20 +34,30 @@ import net.propero.rdp.rdp5.Rdp5;
 
 public class Common {
 
-	public static boolean underApplet = false;
+	public boolean underApplet = false;
+	public Rdp5 rdp;
+	public Secure secure;
+	public MCS mcs;
+	public RdesktopFrame frame;
+	public Rdesktop rdesktop;
 
-	public static Rdp5 rdp;
+	public Options options;
+	public CommunicationMonitor cMonitor;
 
-	public static Secure secure;
-
-	public static MCS mcs;
-
-	public static RdesktopFrame frame;
+	public Common() {
+		this.options = new Options();
+		this.cMonitor = new CommunicationMonitor();
+	}
 
 	/**
 	 * Quit the application
 	 */
-	public static void exit() {
-		Rdesktop.exit(0, rdp, frame, true);
+	public void exit() {
+		rdesktop.exit(0, rdp, frame, true);
 	}
+	
+	public void exit( int n, Rdp rdp, RdesktopFrame window, boolean sysexit ) {
+		rdesktop.exit( n, rdp, window, sysexit );
+	}
+
 }

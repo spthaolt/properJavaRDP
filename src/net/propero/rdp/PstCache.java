@@ -89,8 +89,8 @@ public class PstCache {
 	}
 
 	/* Load a bitmap from the persistent cache */
-	static boolean pstcache_load_bitmap(int cache_id, int cache_idx)
-			throws IOException, RdesktopException {
+	static boolean pstcache_load_bitmap(int cache_id, int cache_idx,
+			Common common) throws IOException, RdesktopException {
 		logger.info("PstCache.pstcache_load_bitmap");
 		byte[] celldata = null;
 		FileInputStream fd;
@@ -98,7 +98,7 @@ public class PstCache {
 		Bitmap bitmap;
 		byte[] cellHead = null;
 
-		if (!Options.persistent_bitmap_caching)
+		if (!common.options.persistent_bitmap_caching)
 			return false;
 
 		if (!IS_PERSISTENT(cache_id) || cache_idx >= Rdp.BMPCACHE2_NUM_PSTCELLS)
@@ -119,7 +119,8 @@ public class PstCache {
 		logger.debug("Loading bitmap from disk (" + cache_id + ":" + cache_idx
 				+ ")\n");
 
-		bitmap = new Bitmap(celldata, c.width, c.height, 0, 0, Options.Bpp);
+		bitmap = new Bitmap(celldata, c.width, c.height, 0, 0,
+				common.options.Bpp, common);
 		// bitmap = ui_create_bitmap(cellhdr.width, cellhdr.height, celldata);
 		Orders.cache.putBitmap(cache_id, cache_idx, bitmap, c.stamp);
 
@@ -129,8 +130,8 @@ public class PstCache {
 
 	/* Store a bitmap in the persistent cache */
 	static boolean pstcache_put_bitmap(int cache_id, int cache_idx,
-			byte[] bitmap_id, int width, int height, int length, byte[] data)
-			throws IOException {
+			byte[] bitmap_id, int width, int height, int length, byte[] data,
+			Common common) throws IOException {
 		logger.info("PstCache.pstcache_put_bitmap");
 		FileOutputStream fd;
 		CELLHEADER cellhdr = new CELLHEADER();
@@ -148,7 +149,7 @@ public class PstCache {
 
 		fd = new FileOutputStream(g_pstcache_fd[cache_id]);
 		int offset = cache_idx
-				* (Options.Bpp * MAX_CELL_SIZE + CELLHEADER.size());
+				* (common.options.Bpp * MAX_CELL_SIZE + CELLHEADER.size());
 		fd.write(cellhdr.toBytes(), offset, CELLHEADER.size());
 		fd.write(data);
 		// rd_lseek_file(fd, cache_idx * (g_pstcache_Bpp * MAX_CELL_SIZE +
@@ -159,14 +160,15 @@ public class PstCache {
 	}
 
 	/* list the bitmaps from the persistent cache file */
-	static int pstcache_enumerate(int cache_id, int[] idlist)
+	static int pstcache_enumerate(int cache_id, int[] idlist, Common common)
 			throws IOException, RdesktopException {
 		logger.info("PstCache.pstcache_enumerate");
 		FileInputStream fd;
 		int n, c = 0;
 		CELLHEADER cellhdr = null;
 
-		if (!(Options.bitmap_caching && Options.persistent_bitmap_caching && IS_PERSISTENT(cache_id)))
+		if (!(common.options.bitmap_caching
+				&& common.options.persistent_bitmap_caching && IS_PERSISTENT(cache_id)))
 			return 0;
 
 		/*
@@ -203,8 +205,9 @@ public class PstCache {
 					 * Pre-caching is not possible with 8bpp because a colourmap
 					 * is needed to load them
 					 */
-					if (Options.precache_bitmaps && (Options.server_bpp > 8)) {
-						if (pstcache_load_bitmap(cache_id, n))
+					if (common.options.precache_bitmaps
+							&& (common.options.server_bpp > 8)) {
+						if (pstcache_load_bitmap(cache_id, n, common))
 							c++;
 					}
 
@@ -222,7 +225,7 @@ public class PstCache {
 	}
 
 	/* initialise the persistent bitmap cache */
-	static boolean pstcache_init(int cache_id) {
+	static boolean pstcache_init(int cache_id, Common common) {
 		// int fd;
 		String filename;
 
@@ -231,10 +234,10 @@ public class PstCache {
 
 		g_pstcache_fd[cache_id] = null;
 
-		if (!(Options.bitmap_caching && Options.persistent_bitmap_caching))
+		if (!(common.options.bitmap_caching && common.options.persistent_bitmap_caching))
 			return false;
 
-		g_pstcache_Bpp = Options.Bpp;
+		g_pstcache_Bpp = common.options.Bpp;
 		filename = "./cache/pstcache_" + cache_id + "_" + g_pstcache_Bpp;
 		logger.debug("persistent bitmap cache file: " + filename);
 

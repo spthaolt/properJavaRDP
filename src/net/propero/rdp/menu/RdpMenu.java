@@ -68,7 +68,7 @@ public class RdpMenu extends MenuBar {
 		m = new Menu("Display");
 		MenuItem mi = null;
 
-		if (!Options.fullscreen) {
+		if (!parent.common.options.fullscreen) {
 			mi = new MenuItem("Fullscreen Mode");
 			mi.disable();
 		} else
@@ -95,7 +95,7 @@ public class RdpMenu extends MenuBar {
 			((MenuItem) event.target).setLabel("Turn Scroll-Lock On");
 
 		if (arg == "Exit")
-			Common.exit();
+			parent.common.exit();
 
 		if (arg == "Fullscreen Mode") {
 			parent.goFullScreen();

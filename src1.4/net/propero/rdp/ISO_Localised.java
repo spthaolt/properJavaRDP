@@ -41,6 +41,10 @@ import java.net.Socket;
 
 public class ISO_Localised extends ISO {
 
+	public ISO_Localised(Common common) {
+		super(common);
+	}
+
 	/*
 	 * protected Socket negotiateSSL(Socket sock) throws Exception { // The
 	 * default host/port to connect to String host="localhost"; int port=4433;
@@ -76,11 +80,9 @@ public class ISO_Localised extends ISO {
 	 * System.out.println("Subject "+cert.getSubjectName().getNameString());
 	 * System.out.println("Serial "+cert.getSerial());
 	 * System.out.println("Validity "+cert.getValidityNotBefore() +"-"+
-	 * cert.getValidityNotAfter());
-	 *  } } System.out.println("-----");
+	 * cert.getValidityNotAfter()); } } System.out.println("-----");
 	 * 
-	 * return s;
-	 *  }
+	 * return s; }
 	 */
 
 	protected void doSocketConnect(InetAddress host, int port)

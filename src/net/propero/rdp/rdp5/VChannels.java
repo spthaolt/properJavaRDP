@@ -32,9 +32,9 @@ package net.propero.rdp.rdp5;
 import java.io.IOException;
 import java.lang.reflect.Array;
 
+import net.propero.rdp.Common;
 import net.propero.rdp.Input;
 import net.propero.rdp.MCS;
-import net.propero.rdp.Options;
 import net.propero.rdp.RdesktopException;
 import net.propero.rdp.RdpPacket_Localised;
 import net.propero.rdp.crypto.CryptoException;
@@ -47,29 +47,20 @@ public class VChannels {
 
 	/* Sound format constants */
 	public static final int WAVE_FORMAT_PCM = 1;
-
 	public static final int WAVE_FORMAT_ADPCM = 2;
-
 	public static final int WAVE_FORMAT_ALAW = 6;
-
 	public static final int WAVE_FORMAT_MULAW = 7;
 
 	/* Virtual channel options */
 	public static final int CHANNEL_OPTION_INITIALIZED = 0x80000000;
-
 	public static final int CHANNEL_OPTION_ENCRYPT_RDP = 0x40000000;
-
 	public static final int CHANNEL_OPTION_COMPRESS_RDP = 0x00800000;
-
 	public static final int CHANNEL_OPTION_SHOW_PROTOCOL = 0x00200000;
 
 	/* NT status codes for RDPDR */
 	public static final int STATUS_SUCCESS = 0x00000000;
-
 	public static final int STATUS_INVALID_PARAMETER = 0xc000000d;
-
 	public static final int STATUS_INVALID_DEVICE_REQUEST = 0xc0000010;
-
 	public static final int STATUS_ACCESS_DENIED = 0xc0000022;
 
 	public static final int MAX_CHANNELS = 4;
@@ -77,9 +68,7 @@ public class VChannels {
 	public static final int CHANNEL_CHUNK_LENGTH = 1600;
 
 	public static final int CHANNEL_FLAG_FIRST = 0x01;
-
 	public static final int CHANNEL_FLAG_LAST = 0x02;
-
 	public static final int CHANNEL_FLAG_SHOW_PROTOCOL = 0x10;
 
 	private VChannel channels[] = new VChannel[MAX_CHANNELS];
@@ -157,8 +146,8 @@ public class VChannels {
 	 * @return True if successful
 	 * @throws RdesktopException
 	 */
-	public boolean register(VChannel v) throws RdesktopException {
-		if (!Options.use_rdp5) {
+	public boolean register(VChannel v, Common c) throws RdesktopException {
+		if (!c.options.use_rdp5) {
 			return false;
 		}
 

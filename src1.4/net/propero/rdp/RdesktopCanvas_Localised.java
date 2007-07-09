@@ -51,8 +51,8 @@ public class RdesktopCanvas_Localised extends RdesktopCanvas {
 
 	private Robot robot = null;
 
-	public static void saveToFile(Image image) {
-		if (Options.server_bpp == 8)
+	public void saveToFile(Image image) {
+		if (common.options.server_bpp == 8)
 			return;
 
 		BufferedImage img = null;
@@ -65,8 +65,9 @@ public class RdesktopCanvas_Localised extends RdesktopCanvas {
 		// Write generated image to a file
 		try {
 			// Save as JPEG
-			File file = new File("./testimages/" + Options.imgCount + ".jpg");
-			Options.imgCount++;
+			File file = new File("./testimages/" + common.options.imgCount
+					+ ".jpg");
+			common.options.imgCount++;
 			ImageIO.write(img, "jpg", file);
 		} catch (IOException e) {
 		}
@@ -76,8 +77,8 @@ public class RdesktopCanvas_Localised extends RdesktopCanvas {
 
 	BufferedImage apex_backstore = null;
 
-	RdesktopCanvas_Localised(int width, int height) {
-		super(width, height);
+	RdesktopCanvas_Localised(int width, int height, Common common) {
+		super(width, height, common);
 		apex_backstore = new BufferedImage(width, height,
 				BufferedImage.TYPE_INT_RGB);
 	}
@@ -112,9 +113,8 @@ public class RdesktopCanvas_Localised extends RdesktopCanvas {
 		g.drawImage(backstore.getSubimage(r.x, r.y, r.width, r.height), r.x,
 				r.y, null);
 
-		if (Options.save_graphics) {
-			RdesktopCanvas_Localised.saveToFile(backstore.getSubimage(r.x, r.y,
-					r.width, r.height));
+		if (common.options.save_graphics) {
+			saveToFile(backstore.getSubimage(r.x, r.y, r.width, r.height));
 		}
 
 		// }

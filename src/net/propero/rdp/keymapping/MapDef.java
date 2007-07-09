@@ -34,8 +34,8 @@ import java.io.PrintStream;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
+import net.propero.rdp.Common;
 import net.propero.rdp.Constants;
-import net.propero.rdp.Options;
 
 public class MapDef {
 
@@ -227,11 +227,11 @@ public class MapDef {
 		return ((characterDef) && (this.keyChar == e.getKeyChar()));
 	}
 
-	protected boolean appliesToTyped(KeyEvent e, boolean capslock) {
+	protected boolean appliesToTyped(KeyEvent e, boolean capslock, Common common) {
 
 		if (Constants.OS == Constants.MAC) {
 			// Remap the hash key to §
-			if (Options.remap_hash && (e.getKeyChar() == '§')) {
+			if (common.options.remap_hash && (e.getKeyChar() == '§')) {
 				return ((characterDef) && (this.keyChar == '#'));
 			}
 

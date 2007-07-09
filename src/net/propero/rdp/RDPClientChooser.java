@@ -42,12 +42,15 @@ import org.apache.log4j.Logger;
 public class RDPClientChooser {
 	static Logger logger = Logger.getLogger(RDPClientChooser.class);
 
+	private Common common;
+
 	/**
 	 * Initialise a client chooser, set logging level to DEBUG
 	 */
-	public RDPClientChooser() {
+	public RDPClientChooser(Common common) {
 		logger.setLevel(Level.DEBUG);
 		logger.info("RDPClientChooser");
+		this.common = common;
 	}
 
 	/**
@@ -114,7 +117,7 @@ public class RDPClientChooser {
 		int c;
 		String arg;
 
-		Options.windowTitle = "Remote Desktop Connection";
+		common.options.windowTitle = "Remote Desktop Connection";
 
 		// Process arguments (there are more than we need now - need to reduce -
 		// also need to check for correct args)
@@ -126,31 +129,31 @@ public class RDPClientChooser {
 			switch (c) {
 
 			case 'd':
-				Options.domain = g.getOptarg();
+				common.options.domain = g.getOptarg();
 				break;
 
 			case 'n':
-				Options.hostname = g.getOptarg();
+				common.options.hostname = g.getOptarg();
 				break;
 
 			case 'p':
-				Options.password = g.getOptarg();
+				common.options.password = g.getOptarg();
 				break;
 
 			case 't':
 				arg = g.getOptarg();
 				try {
-					Options.port = Integer.parseInt(arg);
+					common.options.port = Integer.parseInt(arg);
 				} catch (Exception e) {
 				}
 				break;
 
 			case 'T':
-				Options.windowTitle = g.getOptarg().replace('_', ' ');
+				common.options.windowTitle = g.getOptarg().replace('_', ' ');
 				break;
 
 			case 'u':
-				Options.username = g.getOptarg();
+				common.options.username = g.getOptarg();
 				break;
 
 			case '?':
@@ -170,7 +173,7 @@ public class RDPClientChooser {
 				server = args[args.length - 1];
 			} else {
 				server = args[args.length - 1].substring(0, colonat);
-				Options.port = Integer.parseInt(args[args.length - 1]
+				common.options.port = Integer.parseInt(args[args.length - 1]
 						.substring(colonat + 1));
 			}
 		} else {
@@ -182,8 +185,8 @@ public class RDPClientChooser {
 		// that
 		// we can run multiple instances
 
-		String rdproot = "/var/tmp/RDP-" + Options.hostname + "-"
-				+ Options.port;
+		String rdproot = "/var/tmp/RDP-" + common.options.hostname + "-"
+				+ common.options.port;
 
 		try {
 			new File(rdproot).mkdir();
@@ -211,17 +214,18 @@ public class RDPClientChooser {
 		rdpConfigFile.write("session bpp:i:8\n"); // 256 colors
 		rdpConfigFile.write("winposstr:s:0,3,0,0,800,600\n");
 		rdpConfigFile.write("auto connect:i:1\n");
-		rdpConfigFile.write("full address:s:" + server + ":" + Options.port
-				+ "\n");
+		rdpConfigFile.write("full address:s:" + server + ":"
+				+ common.options.port + "\n");
 		rdpConfigFile.write("compression:i:1\n");
 		rdpConfigFile.write("rightclickmodifiers:i:4608\n");
 		rdpConfigFile.write("altkeyreplacement:i:0\n");
 		rdpConfigFile.write("audiomode:i:1\n");
 		rdpConfigFile.write("redirectdrives:i:1\n");
 		rdpConfigFile.write("redirectprinters:i:1\n");
-		rdpConfigFile.write("username:s:" + Options.username + "\n");
-		rdpConfigFile.write("clear password:s:" + Options.password + "\n");
-		rdpConfigFile.write("domain:s:" + Options.domain + "\n");
+		rdpConfigFile.write("username:s:" + common.options.username + "\n");
+		rdpConfigFile.write("clear password:s:" + common.options.password
+				+ "\n");
+		rdpConfigFile.write("domain:s:" + common.options.domain + "\n");
 		rdpConfigFile.write("alternate shell:s:\n");
 		rdpConfigFile.write("shell working directory:s:\n");
 		rdpConfigFile.write("preference flag id:i:2\n");
@@ -298,7 +302,7 @@ public class RDPClientChooser {
 				"/bin/sh",
 				"-c",
 				"mv " + rdproot + "/Remote\\ Desktop\\ Connection '" + rdproot
-						+ "/" + Options.windowTitle
+						+ "/" + common.options.windowTitle
 						+ "' >/dev/null 2>/dev/null" };
 
 		try {
@@ -319,7 +323,7 @@ public class RDPClientChooser {
 		String[] rdpcmd = {
 				"/bin/sh",
 				"-c",
-				"open -a '" + rdproot + "/" + Options.windowTitle + "' "
+				"open -a '" + rdproot + "/" + common.options.windowTitle + "' "
 						+ rdproot + "/Default.rdp >/dev/null 2>/dev/null" };
 
 		try {

@@ -49,171 +49,104 @@ import org.apache.log4j.NDC;
 public class Rdp {
 
 	public static int RDP5_DISABLE_NOTHING = 0x00;
-
 	public static int RDP5_NO_WALLPAPER = 0x01;
-
 	public static int RDP5_NO_FULLWINDOWDRAG = 0x02;
-
 	public static int RDP5_NO_MENUANIMATIONS = 0x04;
-
 	public static int RDP5_NO_THEMING = 0x08;
-
 	public static int RDP5_NO_CURSOR_SHADOW = 0x20;
-
-	public static int RDP5_NO_CURSORSETTINGS = 0x40; /*
-														 * disables cursor
-														 * blinking
-														 */
+	public static int RDP5_NO_CURSORSETTINGS = 0x40; // disables cursor
+	// blinking
 
 	protected static Logger logger = Logger.getLogger(Rdp.class);
 
 	/* constants for RDP Layer */
 	public static final int RDP_LOGON_NORMAL = 0x33;
-
 	public static final int RDP_LOGON_AUTO = 0x8;
-
 	public static final int RDP_LOGON_BLOB = 0x100;
 
 	// PDU Types
 	private static final int RDP_PDU_DEMAND_ACTIVE = 1;
-
 	private static final int RDP_PDU_CONFIRM_ACTIVE = 3;
-
 	private static final int RDP_PDU_DEACTIVATE = 6;
-
 	private static final int RDP_PDU_DATA = 7;
 
 	// Data PDU Types
 	private static final int RDP_DATA_PDU_UPDATE = 2;
-
 	private static final int RDP_DATA_PDU_CONTROL = 20;
-
 	private static final int RDP_DATA_PDU_POINTER = 27;
-
 	private static final int RDP_DATA_PDU_INPUT = 28;
-
 	private static final int RDP_DATA_PDU_SYNCHRONISE = 31;
-
 	private static final int RDP_DATA_PDU_BELL = 34;
-
 	private static final int RDP_DATA_PDU_LOGON = 38;
-
 	private static final int RDP_DATA_PDU_FONT2 = 39;
-
 	private static final int RDP_DATA_PDU_DISCONNECT = 47;
 
 	// Control PDU types
 	private static final int RDP_CTL_REQUEST_CONTROL = 1;
-
 	private static final int RDP_CTL_GRANT_CONTROL = 2;
-
 	private static final int RDP_CTL_DETACH = 3;
-
 	private static final int RDP_CTL_COOPERATE = 4;
 
 	// Update PDU Types
 	private static final int RDP_UPDATE_ORDERS = 0;
-
 	private static final int RDP_UPDATE_BITMAP = 1;
-
 	private static final int RDP_UPDATE_PALETTE = 2;
-
 	private static final int RDP_UPDATE_SYNCHRONIZE = 3;
 
 	// Pointer PDU Types
 	private static final int RDP_POINTER_SYSTEM = 1;
-
 	private static final int RDP_POINTER_MOVE = 3;
-
 	private static final int RDP_POINTER_COLOR = 6;
-
 	private static final int RDP_POINTER_CACHED = 7;
 
 	// System Pointer Types
 	private static final int RDP_NULL_POINTER = 0;
-
 	private static final int RDP_DEFAULT_POINTER = 0x7F00;
 
 	// Input Devices
 	private static final int RDP_INPUT_SYNCHRONIZE = 0;
-
 	private static final int RDP_INPUT_CODEPOINT = 1;
-
 	private static final int RDP_INPUT_VIRTKEY = 2;
-
 	private static final int RDP_INPUT_SCANCODE = 4;
-
 	private static final int RDP_INPUT_MOUSE = 0x8001;
 
 	/* RDP capabilities */
 	private static final int RDP_CAPSET_GENERAL = 1;
-
 	private static final int RDP_CAPLEN_GENERAL = 0x18;
-
 	private static final int OS_MAJOR_TYPE_UNIX = 4;
-
 	private static final int OS_MINOR_TYPE_XSERVER = 7;
-
 	private static final int RDP_CAPSET_BITMAP = 2;
-
 	private static final int RDP_CAPLEN_BITMAP = 0x1C;
-
 	private static final int RDP_CAPSET_ORDER = 3;
-
 	private static final int RDP_CAPLEN_ORDER = 0x58;
-
 	private static final int ORDER_CAP_NEGOTIATE = 2;
-
 	private static final int ORDER_CAP_NOSUPPORT = 4;
-
 	private static final int RDP_CAPSET_BMPCACHE = 4;
-
 	private static final int RDP_CAPLEN_BMPCACHE = 0x28;
-
 	private static final int RDP_CAPSET_CONTROL = 5;
-
 	private static final int RDP_CAPLEN_CONTROL = 0x0C;
-
 	private static final int RDP_CAPSET_ACTIVATE = 7;
-
 	private static final int RDP_CAPLEN_ACTIVATE = 0x0C;
-
 	private static final int RDP_CAPSET_POINTER = 8;
-
 	private static final int RDP_CAPLEN_POINTER = 0x08;
-
 	private static final int RDP_CAPSET_SHARE = 9;
-
 	private static final int RDP_CAPLEN_SHARE = 0x08;
-
 	private static final int RDP_CAPSET_COLCACHE = 10;
-
 	private static final int RDP_CAPLEN_COLCACHE = 0x08;
-
 	private static final int RDP_CAPSET_UNKNOWN = 13;
-
 	private static final int RDP_CAPLEN_UNKNOWN = 0x9C;
-
 	private static final int RDP_CAPSET_BMPCACHE2 = 19;
-
 	private static final int RDP_CAPLEN_BMPCACHE2 = 0x28;
-
 	private static final int BMPCACHE2_FLAG_PERSIST = (1 << 31);
 
 	/* RDP bitmap cache (version 2) constants */
 	public static final int BMPCACHE2_C0_CELLS = 0x78;
-
 	public static final int BMPCACHE2_C1_CELLS = 0x78;
-
 	public static final int BMPCACHE2_C2_CELLS = 0x150;
-
 	public static final int BMPCACHE2_NUM_PSTCELLS = 0x9f6;
-
 	private static final int RDP5_FLAG = 0x0030;
-
 	private static final byte[] RDP_SOURCE = { (byte) 0x4D, (byte) 0x53,
 			(byte) 0x54, (byte) 0x53, (byte) 0x43, (byte) 0x00 }; // string
-
 	// MSTSC
 	// encoded
 	// as 7 byte
@@ -236,6 +169,8 @@ public class Rdp {
 	private boolean connected = false;
 
 	private RdpPacket_Localised stream = null;
+
+	public Common common = null;
 
 	/*
 	 * private final byte[] canned_caps = { (byte)0x01, (byte)0x00, (byte)0x00,
@@ -308,14 +243,14 @@ public class Rdp {
 	 * @param data
 	 *            Packet containing capability set data at current read position
 	 */
-	static void processGeneralCaps(RdpPacket_Localised data) {
+	static void processGeneralCaps(RdpPacket_Localised data, Common common) {
 		int pad2octetsB; /* rdp5 flags? */
 
 		data.incrementPosition(10); // in_uint8s(s, 10);
 		pad2octetsB = data.getLittleEndian16(); // in_uint16_le(s, pad2octetsB);
 
 		if (pad2octetsB != 0)
-			Options.use_rdp5 = false;
+			common.options.use_rdp5 = false;
 	}
 
 	/**
@@ -324,7 +259,7 @@ public class Rdp {
 	 * @param data
 	 *            Packet containing capability set data at current read position
 	 */
-	static void processBitmapCaps(RdpPacket_Localised data) {
+	static void processBitmapCaps(RdpPacket_Localised data, Common common) {
 		int width, height, bpp;
 
 		bpp = data.getLittleEndian16(); // in_uint16_le(s, bpp);
@@ -340,16 +275,18 @@ public class Rdp {
 		 * The server may limit bpp and change the size of the desktop (for
 		 * example when shadowing another session).
 		 */
-		if (Options.server_bpp != bpp) {
-			logger.warn("colour depth changed from " + Options.server_bpp
-					+ " to " + bpp);
-			Options.server_bpp = bpp;
+		if (common.options.server_bpp != bpp) {
+			logger.warn("colour depth changed from "
+					+ common.options.server_bpp + " to " + bpp);
+			common.options.server_bpp = bpp;
 		}
-		if (Options.width != width || Options.height != height) {
-			logger.warn("screen size changed from " + Options.width + "x"
-					+ Options.height + " to " + width + "x" + height);
-			Options.width = width;
-			Options.height = height;
+		if ((common.options.width != width)
+				|| (common.options.height != height)) {
+			logger.warn("screen size changed from " + common.options.width
+					+ "x" + common.options.height + " to " + width + "x"
+					+ height);
+			common.options.width = width;
+			common.options.height = height;
 			// ui_resize_window(); TODO: implement resize thingy
 		}
 	}
@@ -383,11 +320,11 @@ public class Rdp {
 
 			switch (capset_type) {
 			case RDP_CAPSET_GENERAL:
-				processGeneralCaps(data);
+				processGeneralCaps(data, common);
 				break;
 
 			case RDP_CAPSET_BITMAP:
-				processBitmapCaps(data);
+				processBitmapCaps(data, common);
 				break;
 			}
 
@@ -413,9 +350,10 @@ public class Rdp {
 	 * @param channels
 	 *            Virtual channels to be used in connection
 	 */
-	public Rdp(VChannels channels) {
-		this.SecureLayer = new Secure(channels);
-		Common.secure = SecureLayer;
+	public Rdp(VChannels channels, Common common) {
+		this.common = common;
+		this.SecureLayer = new Secure(channels, common);
+		common.secure = SecureLayer;
 		this.orders = new Orders();
 		this.cache = new Cache();
 		orders.registerCache(cache);
@@ -557,7 +495,7 @@ public class Rdp {
 		catch (ConnectException e) {
 			throw new ConnectionException(
 					"Connection refused when trying to connect to " + server
-							+ " on port " + Options.port);
+							+ " on port " + common.options.port);
 		}
 		// Handle a timeout on connecting
 		catch (NoRouteToHostException e) {
@@ -641,7 +579,7 @@ public class Rdp {
 				// can use this to trigger things that have to be done before
 				// 1st order
 				logger.debug("ready to send (got past licence negotiation)");
-				Rdesktop.readytosend = true;
+				common.rdesktop.readytosend = true;
 				frame.triggerReadyToSend();
 				NDC.pop();
 				deactivated[0] = false;
@@ -713,7 +651,7 @@ public class Rdp {
 
 		RdpPacket_Localised data;
 
-		if (!Options.use_rdp5 || 1 == Options.server_rdp_version) {
+		if (!common.options.use_rdp5 || 1 == common.options.server_rdp_version) {
 			logger.debug("Sending RDP4-style Logon packet");
 
 			data = SecureLayer.init(sec_flags, 18 + domainlen + userlen
@@ -867,7 +805,7 @@ public class Rdp {
 			data.setLittleEndian32(0); // out_uint32(s, 0);
 			data.setLittleEndian32(0xffffffc4); // out_uint32_le(s, 0xffffffc4);
 			data.setLittleEndian32(0xfffffffe); // out_uint32_le(s, 0xfffffffe);
-			data.setLittleEndian32(Options.rdp5_performanceflags); // out_uint32_le(s,
+			data.setLittleEndian32(common.options.rdp5_performanceflags); // out_uint32_le(s,
 			// 0x0f);
 			data.setLittleEndian32(0); // out_uint32(s, 0);
 		}
@@ -965,7 +903,7 @@ public class Rdp {
 			break;
 		case (Rdp.RDP_DATA_PDU_LOGON):
 			logger.debug("User logged on");
-			Rdesktop.loggedon = true;
+			common.rdesktop.loggedon = true;
 			break;
 		case RDP_DATA_PDU_DISCONNECT:
 			/*
@@ -1020,7 +958,7 @@ public class Rdp {
 		// Purpose
 		// unknown
 
-		int sec_flags = Options.encryption ? (RDP5_FLAG | Secure.SEC_ENCRYPT)
+		int sec_flags = common.options.encryption ? (RDP5_FLAG | Secure.SEC_ENCRYPT)
 				: RDP5_FLAG;
 
 		RdpPacket_Localised data = SecureLayer.init(sec_flags, 6 + 14 + caplen
@@ -1031,7 +969,7 @@ public class Rdp {
 
 		data.setLittleEndian16(2 + 14 + caplen + RDP_SOURCE.length);
 		data.setLittleEndian16((RDP_PDU_CONFIRM_ACTIVE | 0x10));
-		data.setLittleEndian16(Common.mcs.getUserID() /* McsUserID() */+ 1001);
+		data.setLittleEndian16(common.mcs.getUserID() /* McsUserID() */+ 1001);
 
 		data.setLittleEndian32(this.rdp_shareid);
 		data.setLittleEndian16(0x3ea); // user id
@@ -1049,7 +987,7 @@ public class Rdp {
 		this.sendBitmapCaps(data);
 		this.sendOrderCaps(data);
 
-		if (Options.use_rdp5 && Options.persistent_bitmap_caching) {
+		if (common.options.use_rdp5 && common.options.persistent_bitmap_caching) {
 			logger.info("Persistent caching enabled");
 			this.sendBitmapcache2Caps(data);
 		} else
@@ -1080,7 +1018,7 @@ public class Rdp {
 		data.markEnd();
 		logger.debug("confirm active");
 		// this.send(data, RDP_PDU_CONFIRM_ACTIVE);
-		Common.secure.send(data, sec_flags);
+		common.secure.send(data, sec_flags);
 	}
 
 	private void sendGeneralCaps(RdpPacket_Localised data) {
@@ -1091,7 +1029,7 @@ public class Rdp {
 		data.setLittleEndian16(1); /* OS major type */
 		data.setLittleEndian16(3); /* OS minor type */
 		data.setLittleEndian16(0x200); /* Protocol version */
-		data.setLittleEndian16(Options.use_rdp5 ? 0x40d : 0);
+		data.setLittleEndian16(common.options.use_rdp5 ? 0x40d : 0);
 		// data.setLittleEndian16(Options.use_rdp5 ? 0x1d04 : 0); // this seems
 		/*
 		 * Pad, according to T.128. 0x40d seems to trigger the server to start
@@ -1112,18 +1050,16 @@ public class Rdp {
 		data.setLittleEndian16(RDP_CAPSET_BITMAP);
 		data.setLittleEndian16(RDP_CAPLEN_BITMAP);
 
-		data.setLittleEndian16(Options.server_bpp); /* Preferred BPP */
+		data.setLittleEndian16(common.options.server_bpp); /* Preferred BPP */
 		data.setLittleEndian16(1); /* Receive 1 BPP */
 		data.setLittleEndian16(1); /* Receive 4 BPP */
 		data.setLittleEndian16(1); /* Receive 8 BPP */
-		data.setLittleEndian16(Options.width); /* Desktop width */
-		data.setLittleEndian16(Options.height); /* Desktop height */
+		data.setLittleEndian16(common.options.width); /* Desktop width */
+		data.setLittleEndian16(common.options.height); /* Desktop height */
 		data.setLittleEndian16(0); /* Pad */
 		data.setLittleEndian16(1); /* Allow resize */
-		data.setLittleEndian16(Options.bitmap_compression ? 1 : 0); /*
-																	 * Support
-																	 * compression
-																	 */
+		data.setLittleEndian16(common.options.bitmap_compression ? 1 : 0); // Support
+		// compression
 		data.setLittleEndian16(0); /* Unknown */
 		data.setLittleEndian16(1); /* Unknown */
 		data.setLittleEndian16(0); /* Pad */
@@ -1135,7 +1071,7 @@ public class Rdp {
 		order_caps[0] = 1; /* dest blt */
 		order_caps[1] = 1; /* pat blt */// nb no rectangle orders if this is 0
 		order_caps[2] = 1; /* screen blt */
-		order_caps[3] = (byte) (Options.bitmap_caching ? 1 : 0); /* memblt */
+		order_caps[3] = (byte) (common.options.bitmap_caching ? 1 : 0); /* memblt */
 		order_caps[4] = 0; /* triblt */
 		order_caps[8] = 1; /* line */
 		order_caps[9] = 1; /* line */
@@ -1143,11 +1079,11 @@ public class Rdp {
 		order_caps[11] = (Constants.desktop_save ? 1 : 0); /* desksave */
 		order_caps[13] = 1; /* memblt */
 		order_caps[14] = 1; /* triblt */
-		order_caps[20] = (byte) (Options.polygon_ellipse_orders ? 1 : 0); /* polygon */
-		order_caps[21] = (byte) (Options.polygon_ellipse_orders ? 1 : 0); /* polygon2 */
+		order_caps[20] = (byte) (common.options.polygon_ellipse_orders ? 1 : 0); /* polygon */
+		order_caps[21] = (byte) (common.options.polygon_ellipse_orders ? 1 : 0); /* polygon2 */
 		order_caps[22] = 1; /* polyline */
-		order_caps[25] = (byte) (Options.polygon_ellipse_orders ? 1 : 0); /* ellipse */
-		order_caps[26] = (byte) (Options.polygon_ellipse_orders ? 1 : 0); /* ellipse2 */
+		order_caps[25] = (byte) (common.options.polygon_ellipse_orders ? 1 : 0); /* ellipse */
+		order_caps[26] = (byte) (common.options.polygon_ellipse_orders ? 1 : 0); /* ellipse2 */
 		order_caps[27] = 1; /* text2 */
 		data.setLittleEndian16(RDP_CAPSET_ORDER);
 		data.setLittleEndian16(RDP_CAPLEN_ORDER);
@@ -1196,7 +1132,9 @@ public class Rdp {
 		data.setLittleEndian16(RDP_CAPLEN_BMPCACHE2); // out_uint16_le(s,
 		// RDP_CAPLEN_BMPCACHE2);
 
-		data.setLittleEndian16(Options.persistent_bitmap_caching ? 2 : 0); /* version */
+		data
+				.setLittleEndian16(common.options.persistent_bitmap_caching ? 2
+						: 0); /* version */
 
 		data.setBigEndian16(3); /* number of caches in this set */
 
@@ -1210,7 +1148,7 @@ public class Rdp {
 		// (BMPCACHE2_NUM_PSTCELLS | BMPCACHE2_FLAG_PERSIST) :
 		// BMPCACHE2_C2_CELLS);
 
-		if (PstCache.pstcache_init(2)) {
+		if (PstCache.pstcache_init(2, common)) {
 			logger.info("Persistent cache initialized");
 			data.setLittleEndian32(BMPCACHE2_NUM_PSTCELLS
 					| BMPCACHE2_FLAG_PERSIST);
@@ -1314,7 +1252,7 @@ public class Rdp {
 		try {
 			data = this.initData(16);
 		} catch (RdesktopException e) {
-			Rdesktop.error(e, this, frame, false);
+			common.rdesktop.error(e, this, frame, false);
 		}
 
 		data.setLittleEndian16(1); /* number of events */
@@ -1332,18 +1270,11 @@ public class Rdp {
 
 		try {
 			this.sendData(data, RDP_DATA_PDU_INPUT);
-		} catch (RdesktopException r) {
-			if (Common.rdp.isConnected())
-				Rdesktop.error(r, Common.rdp, Common.frame, true);
-			Common.exit();
-		} catch (CryptoException c) {
-			if (Common.rdp.isConnected())
-				Rdesktop.error(c, Common.rdp, Common.frame, true);
-			Common.exit();
-		} catch (IOException i) {
-			if (Common.rdp.isConnected())
-				Rdesktop.error(i, Common.rdp, Common.frame, true);
-			Common.exit();
+		} catch (Exception e) { // catch exceptions: RdesktopException,
+			// CryptoException, IOException
+			if (common.rdp.isConnected())
+				common.rdesktop.error(e, common.rdp, common.frame, true);
+			common.exit();
 		}
 	}
 
@@ -1458,10 +1389,10 @@ public class Rdp {
 				maxY = bottom;
 
 			/* Server may limit bpp - this is how we find out */
-			if (Options.server_bpp != bitsperpixel) {
+			if (common.options.server_bpp != bitsperpixel) {
 				logger.warn("Server limited colour depth to " + bitsperpixel
 						+ " bits");
-				Options.set_bpp(bitsperpixel);
+				common.options.set_bpp(bitsperpixel);
 			}
 
 			if (compression == 0) {
@@ -1474,8 +1405,8 @@ public class Rdp {
 					data.incrementPosition(width * Bpp);
 				}
 
-				surface.displayImage(Bitmap.convertImage(pixel, Bpp), width,
-						height, left, top, cx, cy);
+				surface.displayImage(Bitmap.convertImage(pixel, Bpp, common),
+						width, height, left, top, cx, cy);
 				continue;
 			}
 
@@ -1493,23 +1424,24 @@ public class Rdp {
 			if (Bpp == 1) {
 				pixel = Bitmap.decompress(width, height, size, data, Bpp);
 				if (pixel != null)
-					surface.displayImage(Bitmap.convertImage(pixel, Bpp),
-							width, height, left, top, cx, cy);
+					surface.displayImage(Bitmap
+							.convertImage(pixel, Bpp, common), width, height,
+							left, top, cx, cy);
 				else
 					logger.warn("Could not decompress bitmap");
 			} else {
 
-				if (Options.bitmap_decompression_store == Options.INTEGER_BITMAP_DECOMPRESSION) {
+				if (common.options.bitmap_decompression_store == Options.INTEGER_BITMAP_DECOMPRESSION) {
 					int[] pixeli = Bitmap.decompressInt(width, height, size,
-							data, Bpp);
+							data, Bpp, common);
 					if (pixeli != null)
 						surface.displayImage(pixeli, width, height, left, top,
 								cx, cy);
 					else
 						logger.warn("Could not decompress bitmap");
-				} else if (Options.bitmap_decompression_store == Options.BUFFEREDIMAGE_BITMAP_DECOMPRESSION) {
+				} else if (common.options.bitmap_decompression_store == Options.BUFFEREDIMAGE_BITMAP_DECOMPRESSION) {
 					Image pix = Bitmap.decompressImg(width, height, size, data,
-							Bpp, null);
+							Bpp, null, common);
 					if (pix != null)
 						surface.displayImage(pix, left, top);
 					else

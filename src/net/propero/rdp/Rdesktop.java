@@ -157,68 +157,51 @@ public class Rdesktop {
 
 	/* RDP5 disconnect PDU */
 	public static final int exDiscReasonNoInfo = 0x0000;
-
 	public static final int exDiscReasonAPIInitiatedDisconnect = 0x0001;
-
 	public static final int exDiscReasonAPIInitiatedLogoff = 0x0002;
-
 	public static final int exDiscReasonServerIdleTimeout = 0x0003;
-
 	public static final int exDiscReasonServerLogonTimeout = 0x0004;
-
 	public static final int exDiscReasonReplacedByOtherConnection = 0x0005;
-
 	public static final int exDiscReasonOutOfMemory = 0x0006;
-
 	public static final int exDiscReasonServerDeniedConnection = 0x0007;
-
 	public static final int exDiscReasonServerDeniedConnectionFips = 0x0008;
-
 	public static final int exDiscReasonLicenseInternal = 0x0100;
-
 	public static final int exDiscReasonLicenseNoLicenseServer = 0x0101;
-
 	public static final int exDiscReasonLicenseNoLicense = 0x0102;
-
 	public static final int exDiscReasonLicenseErrClientMsg = 0x0103;
-
 	public static final int exDiscReasonLicenseHwidDoesntMatchLicense = 0x0104;
-
 	public static final int exDiscReasonLicenseErrClientLicense = 0x0105;
-
 	public static final int exDiscReasonLicenseCantFinishProtocol = 0x0106;
-
 	public static final int exDiscReasonLicenseClientEndedProtocol = 0x0107;
-
 	public static final int exDiscReasonLicenseErrClientEncryption = 0x0108;
-
 	public static final int exDiscReasonLicenseCantUpgradeLicense = 0x0109;
-
 	public static final int exDiscReasonLicenseNoRemoteConnections = 0x010a;
 
-	static Logger logger = Logger.getLogger("net.propero.rdp");
+	private Logger logger = Logger.getLogger("net.propero.rdp");
 
-	static boolean keep_running;
+	boolean keep_running;
 
-	static boolean loggedon;
+	boolean loggedon;
 
-	static boolean readytosend;
+	boolean readytosend;
 
-	static boolean showTools;
+	boolean showTools;
 
-	static final String keyMapPath = "keymaps/";
+	final String keyMapPath = "keymaps/";
 
-	static String mapFile = "en-gb";
+	String mapFile = "en-gb";
 
-	static String keyMapLocation = "";
+	String keyMapLocation = "";
 
-	static SendEvent toolFrame = null;
+	SendEvent toolFrame = null;
+
+	Common common;
 
 	/**
 	 * Outputs version and usage information via System.err
 	 * 
 	 */
-	public static void usage() {
+	public void usage() {
 		System.err.println("properJavaRDP version " + Version.version);
 		System.err
 				.println("Usage: java net.propero.rdp.Rdesktop [options] server[:port]");
@@ -261,7 +244,24 @@ public class Rdesktop {
 				.println("	--log4j_config=FILE			use FILE for log4j configuration");
 		System.err
 				.println("Example: java net.propero.rdp.Rdesktop -g 800x600 -l WARN m52.propero.int");
-		Rdesktop.exit(0, null, null, true);
+		exit(0, null, null, true);
+	}
+
+	public Rdesktop() {
+		common = new Common();
+		common.rdesktop = this;
+	}
+
+	public Rdesktop(boolean underApplet/* , AppletOptions opts */) {
+		common = new Common();
+		common.rdesktop = this;
+		common.underApplet = underApplet;
+		// common.aOptions = opts;
+	}
+
+	public static void main(String[] args) throws RdesktopException {
+		Rdesktop rdesktop = new Rdesktop();
+		rdesktop.main_nonstatic(args);
 	}
 
 	/**
@@ -270,7 +270,7 @@ public class Rdesktop {
 	 * @throws OrderException
 	 * @throws RdesktopException
 	 */
-	public static void main(String[] args) throws RdesktopException {
+	public void main_nonstatic(String[] args) throws RdesktopException {
 
 		// Ensure that static variables are properly initialised
 		keep_running = true;
@@ -286,10 +286,10 @@ public class Rdesktop {
 
 		// Attempt to run a native RDP Client
 
-		RDPClientChooser Chooser = new RDPClientChooser();
+		RDPClientChooser Chooser = new RDPClientChooser(common);
 
 		if (Chooser.RunNativeRDPClient(args)) {
-			if (!Common.underApplet)
+			if (!common.underApplet)
 				System.exit(0);
 		}
 
@@ -298,6 +298,16 @@ public class Rdesktop {
 		// parse arguments
 
 		int logonflags = Rdp.RDP_LOGON_NORMAL;
+
+		String progname = "properJavaRDP";
+
+		String java = System.getProperty("java.specification.version");
+
+		ClipChannel clipChannel;
+		if (java.startsWith("1.0") || java.startsWith("1.1"))
+			clipChannel = null;
+		else
+			clipChannel = new ClipChannel(common);
 
 		boolean fKdeHack = false;
 		int c;
@@ -321,12 +331,8 @@ public class Rdesktop {
 		alo[14] = new LongOpt("persistent_caching", LongOpt.NO_ARGUMENT, null,
 				0);
 
-		String progname = "properJavaRDP";
-
 		Getopt g = new Getopt("properJavaRDP", args,
 				"bc:d:f::g:k:l:m:n:p:s:t:T:u:o:r:", alo);
-
-		ClipChannel clipChannel = new ClipChannel();
 
 		while ((c = g.getopt()) != -1) {
 			switch (c) {
@@ -334,10 +340,10 @@ public class Rdesktop {
 			case 0:
 				switch (g.getLongind()) {
 				case 0:
-					Options.debug_keyboard = true;
+					common.options.debug_keyboard = true;
 					break;
 				case 1:
-					Options.debug_hexdump = true;
+					common.options.debug_hexdump = true;
 					break;
 				case 2:
 					break;
@@ -350,36 +356,36 @@ public class Rdesktop {
 					showTools = true;
 					break;
 				case 5:
-					Options.altkey_quiet = true;
+					common.options.altkey_quiet = true;
 					break;
 				case 6:
-					Options.remap_hash = false;
+					common.options.remap_hash = false;
 					break;
 				case 7:
-					Options.packet_encryption = false;
+					common.options.packet_encryption = false;
 					break;
 				case 8:
-					Options.use_rdp5 = false;
-					// Options.server_bpp = 8;
-					Options.set_bpp(8);
+					common.options.use_rdp5 = false;
+					// common.options.server_bpp = 8;
+					common.options.set_bpp(8);
 					break;
 				case 9:
-					Options.use_ssl = true;
+					common.options.use_ssl = true;
 					break;
 				case 10:
-					Options.enable_menu = true;
+					common.options.enable_menu = true;
 					break;
 				case 11:
-					Options.console_session = true;
+					common.options.console_session = true;
 					break;
 				case 12:
-					Options.load_licence = true;
+					common.options.load_licence = true;
 					break;
 				case 13:
-					Options.save_licence = true;
+					common.options.save_licence = true;
 					break;
 				case 14:
-					Options.persistent_bitmap_caching = true;
+					common.options.persistent_bitmap_caching = true;
 					break;
 				default:
 					usage();
@@ -387,27 +393,27 @@ public class Rdesktop {
 				break;
 
 			case 'o':
-				Options.set_bpp(Integer.parseInt(g.getOptarg()));
+				common.options.set_bpp(Integer.parseInt(g.getOptarg()));
 				break;
 			case 'b':
-				Options.low_latency = false;
+				common.options.low_latency = false;
 				break;
 			case 'm':
 				mapFile = g.getOptarg();
 				break;
 			case 'c':
-				Options.directory = g.getOptarg();
+				common.options.directory = g.getOptarg();
 				break;
 			case 'd':
-				Options.domain = g.getOptarg();
+				common.options.domain = g.getOptarg();
 				break;
 			case 'f':
 				Dimension screen_size = Toolkit.getDefaultToolkit()
 						.getScreenSize();
 				// ensure width a multiple of 4
-				Options.width = screen_size.width & ~3;
-				Options.height = screen_size.height;
-				Options.fullscreen = true;
+				common.options.width = screen_size.width & ~3;
+				common.options.height = screen_size.height;
+				common.options.fullscreen = true;
 				arg = g.getOptarg();
 				if (arg != null) {
 					if (arg.charAt(0) == 'l')
@@ -426,13 +432,15 @@ public class Rdesktop {
 					System.err.println(progname + ": Invalid geometry: " + arg);
 					usage();
 				}
-				Options.width = Integer.parseInt(arg.substring(0, cut)) & ~3;
-				Options.height = Integer.parseInt(arg.substring(cut + 1));
+				common.options.width = Integer.parseInt(arg.substring(0, cut))
+						& ~3;
+				common.options.height = Integer
+						.parseInt(arg.substring(cut + 1));
 				break;
 			case 'k':
 				arg = g.getOptarg();
-				// Options.keylayout = KeyLayout.strToCode(arg);
-				if (Options.keylayout == -1) {
+				// common.options.keylayout = KeyLayout.strToCode(arg);
+				if (common.options.keylayout == -1) {
 					System.err.println(progname + ": Invalid key layout: "
 							+ arg);
 					usage();
@@ -468,22 +476,22 @@ public class Rdesktop {
 				}
 				break;
 			case 'n':
-				Options.hostname = g.getOptarg();
+				common.options.hostname = g.getOptarg();
 				break;
 			case 'p':
-				Options.password = g.getOptarg();
+				common.options.password = g.getOptarg();
 				logonflags |= Rdp.RDP_LOGON_AUTO;
 				break;
 			case 's':
-				Options.command = g.getOptarg();
+				common.options.command = g.getOptarg();
 				break;
 			case 'u':
-				Options.username = g.getOptarg();
+				common.options.username = g.getOptarg();
 				break;
 			case 't':
 				arg = g.getOptarg();
 				try {
-					Options.port = Integer.parseInt(arg);
+					common.options.port = Integer.parseInt(arg);
 				} catch (NumberFormatException nex) {
 					System.err.println(progname + ": Invalid port number: "
 							+ arg);
@@ -491,10 +499,10 @@ public class Rdesktop {
 				}
 				break;
 			case 'T':
-				Options.windowTitle = g.getOptarg().replace('_', ' ');
+				common.options.windowTitle = g.getOptarg().replace('_', ' ');
 				break;
 			case 'r':
-				Options.licence_path = g.getOptarg();
+				common.options.licence_path = g.getOptarg();
 				break;
 
 			case '?':
@@ -506,7 +514,7 @@ public class Rdesktop {
 		}
 
 		if (fKdeHack) {
-			Options.height -= 46;
+			common.options.height -= 46;
 		}
 
 		String server = null;
@@ -517,7 +525,7 @@ public class Rdesktop {
 				server = args[args.length - 1];
 			} else {
 				server = args[args.length - 1].substring(0, colonat);
-				Options.port = Integer.parseInt(args[args.length - 1]
+				common.options.port = Integer.parseInt(args[args.length - 1]
 						.substring(colonat + 1));
 			}
 		} else {
@@ -528,10 +536,10 @@ public class Rdesktop {
 		VChannels channels = new VChannels();
 
 		// Initialise all RDP5 channels
-		if (Options.use_rdp5) {
+		if (common.options.use_rdp5) {
 			// TODO: implement all relevant channels
-			if (Options.map_clipboard)
-				channels.register(clipChannel);
+			if (common.options.map_clipboard && (clipChannel != null))
+				channels.register(clipChannel, common);
 		}
 
 		// Now do the startup...
@@ -541,14 +549,13 @@ public class Rdesktop {
 		if (args.length == 0)
 			usage();
 
-		String java = System.getProperty("java.specification.version");
 		logger.info("Java version is " + java);
 
 		String os = System.getProperty("os.name");
 		String osvers = System.getProperty("os.version");
 
 		if (os.equals("Windows 2000") || os.equals("Windows XP"))
-			Options.built_in_licence = true;
+			common.options.built_in_licence = true;
 
 		logger.info("Operating System is " + os + " version " + osvers);
 
@@ -560,12 +567,13 @@ public class Rdesktop {
 			Constants.OS = Constants.MAC;
 
 		if (Constants.OS == Constants.MAC)
-			Options.caps_sends_up_and_down = false;
+			common.options.caps_sends_up_and_down = false;
 
 		Rdp5 RdpLayer = null;
-		Common.rdp = RdpLayer;
-		RdesktopFrame window = new RdesktopFrame_Localised();
-		window.setClip(clipChannel);
+		common.rdp = RdpLayer;
+		RdesktopFrame window = new RdesktopFrame_Localised(common);
+		if (clipChannel != null)
+			window.setClip(clipChannel);
 
 		// Configure a keyboard layout
 		KeyCode_FileBased keyMap = null;
@@ -576,19 +584,20 @@ public class Rdesktop {
 			// logger.info("istr = " + istr);
 			if (istr == null) {
 				logger.debug("Loading keymap from filename");
-				keyMap = new KeyCode_FileBased_Localised(keyMapPath + mapFile);
+				keyMap = new KeyCode_FileBased_Localised(keyMapPath + mapFile,
+						common);
 			} else {
 				logger.debug("Loading keymap from InputStream");
-				keyMap = new KeyCode_FileBased_Localised(istr);
+				keyMap = new KeyCode_FileBased_Localised(istr, common);
 			}
 			if (istr != null)
 				istr.close();
-			Options.keylayout = keyMap.getMapCode();
+			common.options.keylayout = keyMap.getMapCode();
 		} catch (Exception kmEx) {
 			String[] msg = { (kmEx.getClass() + ": " + kmEx.getMessage()) };
 			window.showErrorDialog(msg);
 			kmEx.printStackTrace();
-			Rdesktop.exit(0, null, null, true);
+			exit(0, null, null, true);
 		}
 
 		logger.debug("Registering keyboard...");
@@ -601,28 +610,27 @@ public class Rdesktop {
 		logger.debug("keep_running = " + keep_running);
 		while (keep_running) {
 			logger.debug("Initialising RDP layer...");
-			RdpLayer = new Rdp5(channels);
-			Common.rdp = RdpLayer;
+			RdpLayer = new Rdp5(channels, common);
+			common.rdp = RdpLayer;
 			logger.debug("Registering drawing surface...");
 			RdpLayer.registerDrawingSurface(window);
 			logger.debug("Registering comms layer...");
 			window.registerCommLayer(RdpLayer);
 			loggedon = false;
 			readytosend = false;
-			logger
-					.info("Connecting to " + server + ":" + Options.port
-							+ " ...");
+			logger.info("Connecting to " + server + ":" + common.options.port
+					+ " ...");
 
 			if (server.equalsIgnoreCase("localhost"))
 				server = "127.0.0.1";
 
 			if (RdpLayer != null) {
-				// Attempt to connect to server on port Options.port
+				// Attempt to connect to server on port common.options.port
 				try {
-					RdpLayer.connect(Options.username, InetAddress
-							.getByName(server), logonflags, Options.domain,
-							Options.password, Options.command,
-							Options.directory);
+					RdpLayer.connect(common.options.username, InetAddress
+							.getByName(server), logonflags,
+							common.options.domain, common.options.password,
+							common.options.command, common.options.directory);
 
 					// Remove to get rid of sendEvent tool
 					if (showTools) {
@@ -638,8 +646,8 @@ public class Rdesktop {
 						 * encrypted login packet but unencrypted transfer of
 						 * other packets
 						 */
-						if (!Options.packet_encryption)
-							Options.encryption = false;
+						if (!common.options.packet_encryption)
+							common.options.encryption = false;
 
 						logger.info("Connection successful");
 						// now show window after licence negotiation
@@ -647,7 +655,7 @@ public class Rdesktop {
 
 						if (deactivated[0]) {
 							/* clean disconnect */
-							Rdesktop.exit(0, RdpLayer, window, true);
+							exit(0, RdpLayer, window, true);
 							// return 0;
 						} else {
 							if (ext_disc_reason[0] == exDiscReasonAPIInitiatedDisconnect
@@ -656,7 +664,7 @@ public class Rdesktop {
 								 * not so clean disconnect, but nothing to worry
 								 * about
 								 */
-								Rdesktop.exit(0, RdpLayer, window, true);
+								exit(0, RdpLayer, window, true);
 								// return 0;
 							}
 
@@ -666,7 +674,7 @@ public class Rdesktop {
 										reason };
 								window.showErrorDialog(msg);
 								logger.warn("Connection terminated: " + reason);
-								Rdesktop.exit(0, RdpLayer, window, true);
+								exit(0, RdpLayer, window, true);
 							}
 
 						}
@@ -692,7 +700,7 @@ public class Rdesktop {
 				} catch (ConnectionException e) {
 					String msg[] = { "Connection Exception", e.getMessage() };
 					window.showErrorDialog(msg);
-					Rdesktop.exit(0, RdpLayer, window, true);
+					exit(0, RdpLayer, window, true);
 				} catch (UnknownHostException e) {
 					error(e, RdpLayer, window, true);
 				} catch (SocketException s) {
@@ -701,7 +709,7 @@ public class Rdesktop {
 								+ s.getMessage());
 						// s.printStackTrace();
 						error(s, RdpLayer, window, true);
-						Rdesktop.exit(0, RdpLayer, window, true);
+						exit(0, RdpLayer, window, true);
 					}
 				} catch (RdesktopException e) {
 					String msg1 = e.getClass().getName();
@@ -720,7 +728,7 @@ public class Rdesktop {
 						boolean retry = window.showYesNoErrorDialog(msg);
 						if (!retry) {
 							logger.info("Selected not to retry.");
-							Rdesktop.exit(0, RdpLayer, window, true);
+							exit(0, RdpLayer, window, true);
 						} else {
 							if (RdpLayer != null && RdpLayer.isConnected()) {
 								logger.info("Disconnecting ...");
@@ -734,7 +742,7 @@ public class Rdesktop {
 					} else {
 						String msg[] = { e.getMessage() };
 						window.showErrorDialog(msg);
-						Rdesktop.exit(0, RdpLayer, window, true);
+						exit(0, RdpLayer, window, true);
 					}
 				} catch (Exception e) {
 					logger.warn(e.getClass().getName() + " " + e.getMessage());
@@ -746,7 +754,7 @@ public class Rdesktop {
 						.fatal("The communications layer could not be initiated!");
 			}
 		}
-		Rdesktop.exit(0, RdpLayer, window, true);
+		exit(0, RdpLayer, window, true);
 	}
 
 	/**
@@ -761,8 +769,7 @@ public class Rdesktop {
 	 * @param window
 	 * @param sysexit
 	 */
-	public static void exit(int n, Rdp rdp, RdesktopFrame window,
-			boolean sysexit) {
+	public void exit(int n, Rdp rdp, RdesktopFrame window, boolean sysexit) {
 		keep_running = false;
 
 		// Remove to get rid of tool window
@@ -783,7 +790,7 @@ public class Rdesktop {
 		System.gc();
 
 		if (sysexit && Constants.SystemExit) {
-			if (!Common.underApplet)
+			if (!common.underApplet)
 				System.exit(n);
 		}
 	}
@@ -799,12 +806,12 @@ public class Rdesktop {
 	 * @param window
 	 * @param sysexit
 	 */
-	public static void customError(String emsg, Rdp RdpLayer,
-			RdesktopFrame window, boolean sysexit) {
+	public void customError(String emsg, Rdp RdpLayer, RdesktopFrame window,
+			boolean sysexit) {
 		logger.fatal(emsg);
 		String[] msg = { emsg };
 		window.showErrorDialog(msg);
-		Rdesktop.exit(0, RdpLayer, window, true);
+		exit(0, RdpLayer, window, true);
 	}
 
 	/**
@@ -819,7 +826,7 @@ public class Rdesktop {
 	 * @param window
 	 * @param sysexit
 	 */
-	public static void error(Exception e, Rdp RdpLayer, RdesktopFrame window,
+	public void error(Exception e, Rdp RdpLayer, RdesktopFrame window,
 			boolean sysexit) {
 		try {
 
@@ -837,6 +844,6 @@ public class Rdesktop {
 					+ ex.getClass().getName() + ": " + ex.getMessage());
 		}
 
-		Rdesktop.exit(0, RdpLayer, window, sysexit);
+		exit(0, RdpLayer, window, sysexit);
 	}
 }
