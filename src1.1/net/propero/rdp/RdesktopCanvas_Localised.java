@@ -32,14 +32,15 @@ package net.propero.rdp;
 
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.image.*;
-import java.awt.*;
-
-import net.propero.rdp.Options;
 
 public class RdesktopCanvas_Localised extends RdesktopCanvas {
-	RdesktopCanvas_Localised(int width, int height) {
-		super(width, height);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8684455474909490452L;
+
+	RdesktopCanvas_Localised(int width, int height, Common common) {
+		super(width, height, common);
 	}
 
 	public void update(Graphics g) {

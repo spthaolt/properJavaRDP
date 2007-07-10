@@ -29,7 +29,6 @@
  */
 package net.propero.rdp;
 
-import java.awt.event.KeyEvent;
 import java.io.InputStream;
 
 import net.propero.rdp.keymapping.KeyCode_FileBased;
@@ -41,13 +40,14 @@ public class KeyCode_FileBased_Localised extends KeyCode_FileBased {
 	 * @param fstream
 	 * @throws KeyMapException
 	 */
-	public KeyCode_FileBased_Localised(InputStream fstream)
+	public KeyCode_FileBased_Localised(InputStream fstream, Common common)
 			throws KeyMapException {
-		super(fstream);
+		super(fstream, common);
 	}
 
-	public KeyCode_FileBased_Localised(String s) throws KeyMapException {
-		super(s);
+	public KeyCode_FileBased_Localised(String s, Common c)
+			throws KeyMapException {
+		super(s, c);
 	}
 
 }

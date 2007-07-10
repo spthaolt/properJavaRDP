@@ -31,11 +31,18 @@
 package net.propero.rdp;
 
 public class RdesktopFrame_Localised extends RdesktopFrame {
+
+	private static final long serialVersionUID = -4090218562945664540L;
+
+	public RdesktopFrame_Localised(Common common) {
+		super(common);
+	}
+
 	protected void checkFullScreenWidthHeight() {
-		if (Options.fullscreen) {
+		if (common.options.fullscreen) {
 			// can't remove frame decoration so reduce size to compensate
-			Options.height -= 26;
-			Options.width -= 8;
+			common.options.height -= 26;
+			common.options.width -= 8;
 		}
 	}
 }
