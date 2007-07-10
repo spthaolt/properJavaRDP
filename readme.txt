@@ -20,11 +20,11 @@ This software is released without warranty under the GPL (see
 gpl.txt).
 
 * * * * * * * * * Coding style * * * * * * * * *
-We mainly develop this oriject using Eclipse.
+We mainly develop this project using Eclipse.
 
-This project uses Eclipse built-in coding style to have consisten coding
-style accross all files (also minimizes diffs). Please press format the code
-before commiting. Thanks.
+This project uses Eclipse built-in coding style to have consistent coding
+style across all files (also minimizes diffs). Please format the code
+before committing. Thanks.
 * * * * * * * * * Coding style * * * * * * * * *
 
 $Id$
