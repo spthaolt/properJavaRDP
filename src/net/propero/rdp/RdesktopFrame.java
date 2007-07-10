@@ -149,6 +149,13 @@ public abstract class RdesktopFrame extends Frame {
 	}
 
 	/**
+	 * Private constructor to prevent non-common object creation.
+	 */
+	private RdesktopFrame() {
+
+	};
+
+	/**
 	 * Create a new RdesktopFrame. Size defined by Options.width and
 	 * Options.height Creates RdesktopCanvas occupying entire frame
 	 */
@@ -224,7 +231,8 @@ public abstract class RdesktopFrame extends Frame {
 		public void focusGained(FocusEvent arg0) {
 			if (Constants.OS == Constants.WINDOWS) {
 				// canvas.repaint();
-				canvas.repaint(0, 0, common.options.width, common.options.height);
+				canvas.repaint(0, 0, common.options.width,
+						common.options.height);
 			}
 			// gained focus..need to check state of locking keys
 			canvas.gainedFocus();
@@ -252,7 +260,8 @@ public abstract class RdesktopFrame extends Frame {
 		public void windowDeiconified(WindowEvent e) {
 			if (Constants.OS == Constants.WINDOWS) {
 				// canvas.repaint();
-				canvas.repaint(0, 0, common.options.width, common.options.height);
+				canvas.repaint(0, 0, common.options.width,
+						common.options.height);
 			}
 			canvas.gainedFocus();
 		}
@@ -260,7 +269,8 @@ public abstract class RdesktopFrame extends Frame {
 		public void windowActivated(WindowEvent e) {
 			if (Constants.OS == Constants.WINDOWS) {
 				// canvas.repaint();
-				canvas.repaint(0, 0, common.options.width, common.options.height);
+				canvas.repaint(0, 0, common.options.width,
+						common.options.height);
 			}
 			// gained focus..need to check state of locking keys
 			canvas.gainedFocus();
@@ -269,7 +279,8 @@ public abstract class RdesktopFrame extends Frame {
 		public void windowGainedFocus(WindowEvent e) {
 			if (Constants.OS == Constants.WINDOWS) {
 				// canvas.repaint();
-				canvas.repaint(0, 0, common.options.width, common.options.height);
+				canvas.repaint(0, 0, common.options.width,
+						common.options.height);
 			}
 			// gained focus..need to check state of locking keys
 			canvas.gainedFocus();
