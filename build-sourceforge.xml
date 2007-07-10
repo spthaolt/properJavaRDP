@@ -5,13 +5,13 @@
   <property name="build.dir" value="${basedir}/build"/>
   <property name="src.dir" value="${basedir}/src"/>
   <property name="rpm.dir" value="${basedir}/rpm"/>
+  <property name="lib.dir" value="${basedir}/lib"/>
 
-  <property name="java.log4j11.package" value="${basedir}/log4j-java1.1"/>
-  <property name="java.getopt.package" value="${basedir}/gnu-getopt-1.0.11-java/lib"/>
+  <property name="java.log4j11.package" value="${lib.dir}"/>
+  <property name="java.getopt.package" value="${lib.dir}"/>
 	
-  <property name="log4j.java11" value="log4j-java1.1"/>
   <property name="jar.log4j.java11" value="log4j-java1.1.jar"/>
-  <property name="jar.gnugetopt" value="java-getopt-1.0.11.jar"/>
+  <property name="jar.gnugetopt" value="java-getopt-1.0.13.jar"/>
   <property name="commonxml" value="${basedir}/build-common.xml"/>
   <property name="runclass" value="net.propero.rdp.Rdesktop"/>
 
