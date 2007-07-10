@@ -30,7 +30,7 @@
 //Created on 07-Jul-2003
 package net.propero.rdp;
 
-import java.awt.event.*;
+import java.awt.event.KeyEvent;
 
 import net.propero.rdp.keymapping.KeyCode;
 import net.propero.rdp.keymapping.KeyCode_FileBased;

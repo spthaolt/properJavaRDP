@@ -30,15 +30,19 @@
 // Created on 03-Sep-2003
 package net.propero.rdp;
 
-import java.awt.image.*;
-import java.awt.*;
-
-import net.propero.rdp.Options;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
 
 public class RdesktopCanvas_Localised extends RdesktopCanvas {
 
-	RdesktopCanvas_Localised(int width, int height) {
-		super(width, height);
+	private static final long serialVersionUID = 8979257318111564418L;
+
+	RdesktopCanvas_Localised(int width, int height, Common common) {
+		super(width, height, common);
 	}
 
 	protected Cursor createCustomCursor(Image wincursor, Point p, String s,

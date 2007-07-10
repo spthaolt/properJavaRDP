@@ -32,4 +32,8 @@ package net.propero.rdp;
 
 public class ISO_Localised extends ISO {
 
+	public ISO_Localised(Common common) {
+		super(common);
+	}
+
 }
