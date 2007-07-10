@@ -30,17 +30,23 @@
 // Created on 03-Sep-2003
 package net.propero.rdp;
 
-import java.awt.image.*;
-import java.awt.*;
-
-import net.propero.rdp.Options;
+import java.awt.AWTException;
+import java.awt.Cursor;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.Toolkit;
 
 public class RdesktopCanvas_Localised extends RdesktopCanvas {
 
+	private static final long serialVersionUID = -1868233302277335574L;
+
 	private Robot robot = null;
 
-	RdesktopCanvas_Localised(int width, int height) {
-		super(width, height);
+	RdesktopCanvas_Localised(int width, int height, Common common) {
+		super(width, height, common);
 	}
 
 	public void movePointer(int x, int y) {

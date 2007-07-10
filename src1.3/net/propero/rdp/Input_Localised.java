@@ -30,10 +30,9 @@
 //Created on 07-Jul-2003
 package net.propero.rdp;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 
-import net.propero.rdp.Options;
 import net.propero.rdp.keymapping.KeyCode;
 import net.propero.rdp.keymapping.KeyCode_FileBased;
 
@@ -84,7 +83,7 @@ public class Input_Localised extends Input {
 		// doesn't work on Java 1.4.1_02 or 1.4.2 on Linux, there is a bug in
 		// java....
 		// does work on the same version on Windows.
-		if (!Rdesktop.readytosend)
+		if (!rdp.common.rdesktop.readytosend)
 			return;
 		if (Constants.OS == Constants.LINUX)
 			return; // broken for linux
@@ -115,7 +114,7 @@ public class Input_Localised extends Input {
 				sendScancode(getTime(), RDP_KEYRELEASE, 0x46);
 			}
 		} catch (Exception e) {
-			Options.useLockingKeyState = false;
+			rdp.common.options.useLockingKeyState = false;
 		}
 	}
 
