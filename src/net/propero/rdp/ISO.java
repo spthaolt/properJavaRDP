@@ -70,9 +70,9 @@ public abstract class ISO {
 	/**
 	 * Construct ISO object, initialises hex dump
 	 */
-	public ISO(Common argCommon) {
+	public ISO(Common common) {
 		dump = new HexDump();
-		this.common = argCommon;
+		this.common = common;
 	}
 
 	/**
