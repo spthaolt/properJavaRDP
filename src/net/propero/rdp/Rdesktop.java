@@ -53,6 +53,33 @@ import org.apache.log4j.PropertyConfigurator;
 
 public class Rdesktop {
 
+	private static final String[] textDisconnectReason = {
+			"No information available", // 0x0000
+			"Server initiated disconnect", // 0x0001
+			"Server initiated logoff", // 0x0002
+			"Server idle timeout reached", // 0x0003
+			"Server logon timeout reached", // 0x0004
+			"Another user connected to the session", // 0x0005
+			"The server is out of memory", // 0x0006
+			"The server denied the connection", // 0x0007
+			"The server denied the connection for security reason" // 0x0008
+	};
+
+	private static final String[] textDisconnectLicenseReason = {
+			"Internal licensing error", // 0x0100
+			"No license server available", // 0x0101
+			"No valid license available", // 0x0102
+			"Invalid licensing message", // 0x0103
+			"Hardware id doesn't match software license", // 0x0104
+			"Client license error", // 0x0105
+			"Network error during licensing protocol", // 0x0106
+			"Licensing protocol was not completed", // 0x0107
+			"Incorrect client license enryption", // 0x0108
+			"Can't upgrade license", // 0x0109
+			"The server is not licensed to accept remote connections" // 0x010a
+
+	};
+
 	/**
 	 * Translate a disconnect code into a textual description of the reason for
 	 * the disconnect
@@ -62,97 +89,23 @@ public class Rdesktop {
 	 * @return Text description of the reason for disconnection
 	 */
 	static String textDisconnectReason(int reason) {
-		String text;
 
-		switch (reason) {
-		case exDiscReasonNoInfo:
-			text = "No information available";
-			break;
+		if (reason < 0)
+			return "Unknown reason";
 
-		case exDiscReasonAPIInitiatedDisconnect:
-			text = "Server initiated disconnect";
-			break;
+		if (reason < 9)
+			return textDisconnectReason[reason];
 
-		case exDiscReasonAPIInitiatedLogoff:
-			text = "Server initiated logoff";
-			break;
+		if (reason < 0x0100)
+			return "Unknown reason";
 
-		case exDiscReasonServerIdleTimeout:
-			text = "Server idle timeout reached";
-			break;
+		if (reason < 0x010b)
+			return textDisconnectLicenseReason[reason & 0x000f];
 
-		case exDiscReasonServerLogonTimeout:
-			text = "Server logon timeout reached";
-			break;
+		if ((reason > 0x1000) && (reason < 0x7fff))
+			return "Internal protocol error";
 
-		case exDiscReasonReplacedByOtherConnection:
-			text = "Another user connected to the session";
-			break;
-
-		case exDiscReasonOutOfMemory:
-			text = "The server is out of memory";
-			break;
-
-		case exDiscReasonServerDeniedConnection:
-			text = "The server denied the connection";
-			break;
-
-		case exDiscReasonServerDeniedConnectionFips:
-			text = "The server denied the connection for security reason";
-			break;
-
-		case exDiscReasonLicenseInternal:
-			text = "Internal licensing error";
-			break;
-
-		case exDiscReasonLicenseNoLicenseServer:
-			text = "No license server available";
-			break;
-
-		case exDiscReasonLicenseNoLicense:
-			text = "No valid license available";
-			break;
-
-		case exDiscReasonLicenseErrClientMsg:
-			text = "Invalid licensing message";
-			break;
-
-		case exDiscReasonLicenseHwidDoesntMatchLicense:
-			text = "Hardware id doesn't match software license";
-			break;
-
-		case exDiscReasonLicenseErrClientLicense:
-			text = "Client license error";
-			break;
-
-		case exDiscReasonLicenseCantFinishProtocol:
-			text = "Network error during licensing protocol";
-			break;
-
-		case exDiscReasonLicenseClientEndedProtocol:
-			text = "Licensing protocol was not completed";
-			break;
-
-		case exDiscReasonLicenseErrClientEncryption:
-			text = "Incorrect client license enryption";
-			break;
-
-		case exDiscReasonLicenseCantUpgradeLicense:
-			text = "Can't upgrade license";
-			break;
-
-		case exDiscReasonLicenseNoRemoteConnections:
-			text = "The server is not licensed to accept remote connections";
-			break;
-
-		default:
-			if (reason > 0x1000 && reason < 0x7fff) {
-				text = "Internal protocol error";
-			} else {
-				text = "Unknown reason";
-			}
-		}
-		return text;
+		return "Unknown reason";
 	}
 
 	/* RDP5 disconnect PDU */

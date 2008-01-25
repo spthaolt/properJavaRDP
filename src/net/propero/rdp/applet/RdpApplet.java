@@ -42,9 +42,8 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.StringTokenizer;
+import java.util.Vector;
 
-import net.propero.rdp.Common;
 import net.propero.rdp.Rdesktop;
 import net.propero.rdp.RdesktopException;
 
@@ -93,35 +92,32 @@ public class RdpApplet extends Applet {
 
 	public void start() {
 
-		String argLine = "";
-		argLine += genParam("-m", "keymap");
-		argLine += " " + genParam("-u", "username");
-		argLine += " " + genParam("-p", "password");
-		argLine += " " + genParam("-n", "hostname");
-		argLine += " " + genParam("-t", "port");
-		argLine += " " + genParam("-l", "debug_level");
-		argLine += " " + genParam("-s", "shell");
-		argLine += " " + genParam("-t", "title");
-		argLine += " " + genParam("-c", "command");
-		argLine += " " + genParam("-d", "domain");
-		argLine += " " + genParam("-o", "bpp");
-		argLine += " " + genParam("-g", "geometry");
-		argLine += " " + genParam("-s", "shell");
-		argLine += " " + genFlag("--console", "console");
-		argLine += " " + genFlag("--use_rdp4", "rdp4");
-		argLine += " " + genFlag("--debug_key", "debug_key");
-		argLine += " " + genFlag("--debug_hex", "debug_hex");
-		argLine += " " + genFlag("--no_remap_hash", "no_remap_hash");
+		Vector vArgs = new Vector();
 
-		argLine += " " + genParam("", "server");
+		genParam(vArgs, "-m", "keymap");
+		genParam(vArgs, "-u", "username");
+		genParam(vArgs, "-p", "password");
+		genParam(vArgs, "-n", "hostname");
+		genParam(vArgs, "-t", "port");
+		genParam(vArgs, "-l", "debug_level");
+		genParam(vArgs, "-s", "shell");
+		genParam(vArgs, "-t", "title");
+		genParam(vArgs, "-c", "command");
+		genParam(vArgs, "-d", "domain");
+		genParam(vArgs, "-o", "bpp");
+		genParam(vArgs, "-g", "geometry");
+		genParam(vArgs, "-s", "shell");
+		genFlag(vArgs, "--console", "console");
+		genFlag(vArgs, "--use_rdp4", "rdp4");
+		genFlag(vArgs, "--debug_key", "debug_key");
+		genFlag(vArgs, "--debug_hex", "debug_hex");
+		genFlag(vArgs, "--no_remap_hash", "no_remap_hash");
 
-		String[] args;
-		StringTokenizer tok = new StringTokenizer(argLine, " ");
-		for (Object[] obj = { tok, args = new String[tok.countTokens()],
-				new int[] { 0 } }; ((StringTokenizer) obj[0]).hasMoreTokens(); ((String[]) obj[1])[((int[]) obj[2])[0]++] = ((StringTokenizer) obj[0])
-				.nextToken()) {
-		}
-		// String[] args = argLine.split(" ");
+		genParam(vArgs, "", "server");
+
+		String[] args = new String[vArgs.size()];
+		for (int i = 0; i < vArgs.size(); i++)
+			args[i] = (String) vArgs.elementAt(i);
 
 		rThread = new RdpThread(args, this.getParameter("redirect_on_exit"),
 				this);
@@ -135,31 +131,22 @@ public class RdpApplet extends Applet {
 
 	private boolean isSet(String parameter) {
 		String s = this.getParameter(parameter);
-		if (s != null) {
-			if (s.equalsIgnoreCase("yes"))
-				return true;
-		}
-		return false;
+		return (s != null) && s.equalsIgnoreCase("yes");
 	}
 
-	private String genFlag(String flag, String parameter) {
+	private void genFlag(Vector args, String flag, String parameter) {
 		String s = this.getParameter(parameter);
-		if (s != null) {
-			if (s.equalsIgnoreCase("yes"))
-				return flag;
-		}
-		return "";
+		if ((s != null) && (s.equalsIgnoreCase("yes")))
+			args.addElement(flag);
 	}
 
-	private String genParam(String name, String parameter) {
+	private void genParam(Vector args, String name, String parameter) {
 		String s = this.getParameter(parameter);
 		if (s != null) {
 			if (name != "")
-				return name + " " + s;
-			else
-				return s;
-		} else
-			return "";
+				args.addElement(name);
+			args.addElement(s);
+		}
 	}
 
 	class FilteredStream extends FilterOutputStream {
@@ -204,10 +191,8 @@ class RdpThread extends Thread {
 				parentApplet.getAppletContext().showDocument(u);
 			}
 		} catch (RdesktopException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
 			System.err.println(e.getClass().getName() + ": " + e.getMessage());
 			e.printStackTrace();
 		}
