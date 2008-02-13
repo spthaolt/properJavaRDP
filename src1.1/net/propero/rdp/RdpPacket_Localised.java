@@ -47,36 +47,32 @@ public class RdpPacket_Localised extends RdpPacket {
 	}
 
 	public void set8(int where, int what) {
-		if (where < 0 || where >= size) {
+		if ((where < 0) || (where >= size))
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
 		bb[where] = (byte) what;
 	}
 
 	public void set8(int what) {
-		if (position >= size) {
+		if (position >= size)
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
 		bb[position++] = (byte) what;
 	}
 
 	// where is a 8-bit offset
 	public int get8(int where) {
-		if (where < 0 || where >= size) {
+		if (where < 0 || where >= size)
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
 		return bb[where] & 0xff; // treat as unsigned byte
 	}
 
 	// where is a 8-bit offset
 	public int get8() {
-		if (position >= size) {
+		if (position >= size)
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
 		return bb[position++] & 0xff; // treat as unsigned byte
 	}
 
@@ -84,11 +80,9 @@ public class RdpPacket_Localised extends RdpPacket {
 			int mem_offset, int len) {
 		if ((array_offset >= array.length)
 				|| (array_offset + len > array.length)
-				|| (mem_offset + len > size)) {
+				|| (mem_offset + len > size))
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
-
 		System.arraycopy(array, array_offset, bb, mem_offset, len);
 	}
 
@@ -96,11 +90,9 @@ public class RdpPacket_Localised extends RdpPacket {
 			int len) {
 		if ((array_offset >= array.length)
 				|| (array_offset + len > array.length)
-				|| (mem_offset + len > size)) {
+				|| (mem_offset + len > size))
 			throw new ArrayIndexOutOfBoundsException(
 					"memory accessed out of Range!");
-		}
-
 		System.arraycopy(bb, mem_offset, array, array_offset, len);
 	}
 
@@ -211,17 +203,14 @@ public class RdpPacket_Localised extends RdpPacket {
 	}
 
 	public void incrementPosition(int length) {
-
-		if (length > size || length + position > size || length < 0) {
+		if ((length > size) || (length + position > size) || (length < 0))
 			throw new ArrayIndexOutOfBoundsException();
-		}
 		position += length;
 	}
 
 	public void setPosition(int position) {
-		if (position > size || position < 0) {
+		if ((position > size) || (position < 0))
 			throw new ArrayIndexOutOfBoundsException();
-		}
 		this.position = position;
 	}
 
