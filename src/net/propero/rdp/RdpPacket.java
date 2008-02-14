@@ -242,7 +242,7 @@ public abstract class RdpPacket {
 	public abstract void setBigEndian32(int where, int what);
 
 	/**
-	 * Copy data from this packet to an array of bytes
+	 * Copy data from this packet to an array of bytes. Does not advance position!
 	 * 
 	 * @param array
 	 *            Array of bytes to which data should be copied

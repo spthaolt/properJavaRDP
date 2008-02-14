@@ -44,6 +44,7 @@ import net.propero.rdp.keymapping.KeyCode_FileBased;
 import net.propero.rdp.rdp5.Rdp5;
 import net.propero.rdp.rdp5.VChannels;
 import net.propero.rdp.rdp5.cliprdr.ClipChannel;
+import net.propero.rdp.rdp5.rdpsnd.SoundChannel;
 import net.propero.rdp.tools.SendEvent;
 
 import org.apache.log4j.BasicConfigurator;
@@ -223,25 +224,31 @@ public class Rdesktop {
 		System.err
 				.println("Usage: java net.propero.rdp.Rdesktop [options] server[:port]");
 		System.err
-				.println("	-b 							bandwidth saving (good for 56k modem, but higher latency");
-		System.err.println("	-c DIR						working directory");
-		System.err.println("	-d DOMAIN					logon domain");
+				.println("    -b                          bandwidth saving (good for 56k modem, but higher latency");
 		System.err
-				.println("	-f[l]						full-screen mode [with Linux KDE optimization]");
-		System.err.println("	-g WxH						desktop geometry");
+				.println("    -c DIR                       working directory");
+		System.err.println("    -d DOMAIN                    logon domain");
 		System.err
-				.println("	-m MAPFILE					keyboard mapping file for terminal server");
+				.println("    -f[l]                       full-screen mode [with Linux KDE optimization]");
+		System.err.println("    -g WxH                       desktop geometry");
 		System.err
-				.println("	-l LEVEL					logging level {DEBUG, INFO, WARN, ERROR, FATAL}");
-		System.err.println("	-n HOSTNAME					client hostname");
-		System.err.println("	-p PASSWORD					password");
-		System.err.println("	-s SHELL					shell");
-		System.err.println("	-t NUM						RDP port (default 3389)");
-		System.err.println("	-T TITLE					window title");
-		System.err.println("	-u USERNAME					user name");
-		System.err.println("	-o BPP						bits-per-pixel for display");
+				.println("    -m MAPFILE                  keyboard mapping file for terminal server");
+		System.err
+				.println("    -l LEVEL                    logging level {DEBUG, INFO, WARN, ERROR, FATAL}");
+		System.err.println("    -n HOSTNAME                  client hostname");
+		System.err.println("    -p PASSWORD                  password");
+		System.err.println("    -s SHELL                     shell");
+		System.err
+				.println("    -t NUM                       RDP port (default 3389)");
+		System.err.println("    -T TITLE                     window title");
+		System.err.println("    -u USERNAME                  user name");
+		System.err
+				.println("    -o BPP                       bits-per-pixel for display");
 		System.err
 				.println("    -r path                     path to load licence from (requests and saves licence from server if not found)");
+		System.err
+				.println("    -a local|off|remote         audio redirection.");
+
 		System.err
 				.println("    --save_licence              request and save licence from server");
 		System.err
@@ -249,16 +256,20 @@ public class Rdesktop {
 		System.err
 				.println("    --console                   connect to console");
 		System.err
-				.println("	--debug_key 				show scancodes sent for each keypress etc");
-		System.err.println("	--debug_hex 				show bytes sent and received");
-		System.err.println("	--no_remap_hash 			disable hash remapping");
-		System.err.println("	--quiet_alt 				enable quiet alt fix");
+				.println("    --debug_key                 show scancodes sent for each keypress etc");
 		System.err
-				.println("	--no_encryption				disable encryption from client to server");
-		System.err.println("	--use_rdp4					use RDP version 4");
+				.println("	--debug_hex                  show bytes sent and received");
+		System.err
+				.println("	--no_remap_hash              disable hash remapping");
+		System.err
+				.println("	--quiet_alt                  enable quiet alt fix");
+		System.err
+				.println("    --no_encryption             disable encryption from client to server");
+		System.err
+				.println("    --use_rdp4                   use RDP version 4");
 		// System.err.println(" --enable_menu enable menu bar");
 		System.err
-				.println("	--log4j_config=FILE			use FILE for log4j configuration");
+				.println("    --log4j_config=FILE            use FILE for log4j configuration");
 		System.err
 				.println("Example: java net.propero.rdp.Rdesktop -g 800x600 -l WARN m52.propero.int");
 		Rdesktop.exit(0, null, null, true);
@@ -324,9 +335,10 @@ public class Rdesktop {
 		String progname = "properJavaRDP";
 
 		Getopt g = new Getopt("properJavaRDP", args,
-				"bc:d:f::g:k:l:m:n:p:s:t:T:u:o:r:", alo);
+				"bc:d:f::g:k:l:m:n:p:s:t:T:u:o:r:a:", alo);
 
 		ClipChannel clipChannel = new ClipChannel();
+		boolean soundLocal = true; // bring sound to this computer by default
 
 		while ((c = g.getopt()) != -1) {
 			switch (c) {
@@ -496,6 +508,15 @@ public class Rdesktop {
 			case 'r':
 				Options.licence_path = g.getOptarg();
 				break;
+			case 'a':
+				String redirectAudio = g.getOptarg();
+				if (redirectAudio.equalsIgnoreCase("off"))
+					soundLocal = false;
+				else if (redirectAudio.equalsIgnoreCase("remote")) {
+					logonflags |= Rdp.RDP_LOGON_LEAVE_AUDIO;
+					soundLocal = false;
+				}
+				break;
 
 			case '?':
 			default:
@@ -525,6 +546,9 @@ public class Rdesktop {
 			usage();
 		}
 
+		String java = System.getProperty("java.specification.version");
+		logger.info("Java version is " + java);
+
 		VChannels channels = new VChannels();
 
 		// Initialise all RDP5 channels
@@ -532,6 +556,8 @@ public class Rdesktop {
 			// TODO: implement all relevant channels
 			if (Options.map_clipboard)
 				channels.register(clipChannel);
+			if ((java.compareTo("1.4") >= 0) && soundLocal)
+				channels.register(new SoundChannel());
 		}
 
 		// Now do the startup...
@@ -540,9 +566,6 @@ public class Rdesktop {
 
 		if (args.length == 0)
 			usage();
-
-		String java = System.getProperty("java.specification.version");
-		logger.info("Java version is " + java);
 
 		String os = System.getProperty("os.name");
 		String osvers = System.getProperty("os.version");
@@ -642,7 +665,7 @@ public class Rdesktop {
 							Options.encryption = false;
 
 						logger.info("Connection successful");
-						// now show window after licence negotiation
+						// now show window after license negotiation
 						RdpLayer.mainLoop(deactivated, ext_disc_reason);
 
 						if (deactivated[0]) {
