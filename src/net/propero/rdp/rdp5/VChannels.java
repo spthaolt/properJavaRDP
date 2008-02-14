@@ -166,6 +166,8 @@ public class VChannels {
 			throw new RdesktopException(
 					"Channel table full. Could not register channel.");
 
+		logger.info("Registering channel " + v.name());
+
 		channels[num_channels] = v;
 		v.set_mcs_id(MCS.MCS_GLOBAL_CHANNEL + 1 + num_channels);
 		num_channels++;
