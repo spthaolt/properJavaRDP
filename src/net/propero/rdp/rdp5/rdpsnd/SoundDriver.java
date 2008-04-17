@@ -36,6 +36,11 @@ import java.util.GregorianCalendar;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.Line;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.Mixer;
+import javax.sound.sampled.Port;
 import javax.sound.sampled.SourceDataLine;
 
 import net.propero.rdp.Input;
@@ -68,6 +73,8 @@ public class SoundDriver {
 
 	private SourceDataLine oDevice;
 
+	private FloatControl volumeControl;
+
 	private int volume;
 
 	private WaveFormatEx format;
@@ -94,6 +101,7 @@ public class SoundDriver {
 		oDevice = null;
 		format = null;
 		volume = 65535;
+		volumeControl = getVolumeControl();
 	}
 
 	public boolean waveOutOpen() {
@@ -166,6 +174,9 @@ public class SoundDriver {
 
 	public void waveOutVolume(int left, int right) {
 		volume = left < right ? right : left;
+		if (volumeControl != null)
+			volumeControl.setValue(volume * volumeControl.getPrecision()
+					+ volumeControl.getMinimum());
 	}
 
 	public void waveOutPlay() {
@@ -239,6 +250,32 @@ public class SoundDriver {
 		default:
 			return false;
 		}
+	}
+
+	private FloatControl getVolumeControl() {
+		Mixer.Info[] mixerInfo = AudioSystem.getMixerInfo();
+		Line.Info portInfo = new Line.Info(Port.class);
+
+		for (int i = 0; i < mixerInfo.length; i++) {
+			Mixer mixer = AudioSystem.getMixer(mixerInfo[i]);
+
+			if (mixer.isLineSupported(portInfo)) {
+				Line.Info[] lineInfo = mixer.getTargetLineInfo();
+				for (int j = 0; j < lineInfo.length; j++) {
+					try {
+						Line line = mixer.getLine(lineInfo[j]);
+						line.open();
+						if (line.isControlSupported(FloatControl.Type.VOLUME))
+							return (FloatControl) line
+									.getControl(FloatControl.Type.VOLUME);
+						line.close();
+					} catch (LineUnavailableException e) {
+						// do nothing
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 }
