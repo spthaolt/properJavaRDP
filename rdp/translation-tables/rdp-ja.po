@@ -1,0 +1,33 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2007-03-21 22:51-0800\n"
+"Last-Translator: X. Shan <xushan@cisco.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Terminal Servers."
+msgstr "ターミナルサーバ。"
+
+msgid "Java is required for the plugin to run."
+msgstr "プラグインを実行するには、Javaが必要です。"
+
+msgid "Loading the plugin..."
+msgstr "プラグインをロードしています..."
+
+msgid ""
+"Terminal Server  connection will open in a popup window. <p>Please don't "
+"close this page or go back to the portal page until you are finished with "
+"the session. <p>Click <a href=javascript:ope()>here</a> if you want to open "
+"another window with the portal page."
+msgstr ""
+"ターミナルサーバ接続は、ポップアップウィンドウに開きます。<p>セッションが完了"
+"するまでは、このページを閉じたり、ポータルページに戻ったりしないでください。"
+"<p>ポータルページで別のウィンドウを開く場合は、<a href=javascript:ope()>ここ"
+"</a>をクリックしてください。"
+
+msgid "Terminal server connection"
+msgstr "ターミナルサーバ接続"

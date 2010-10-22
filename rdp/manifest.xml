@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plug-in>
+  <handler>properrdp.html</handler>
+  <protocol>rdp</protocol>
+  <default-port>3389</default-port>
+  <id>csco_rdp</id>
+  <version>1.0.2</version>
+  <name>Terminal Servers</name>
+  <bookmark-title>Terminal Servers Bookmarks</bookmark-title>
+  <icon>icon.gif</icon>
+  <l10n>
+    <messages>
+      <template>translation-tables/rdp.pot</template>
+      <description>Translation domain for RDP plugin</description>
+    </messages>
+  </l10n>
+  <help-files>
+    <help-file>
+      <language>en</language>
+      <filename>help/en/index.inc</filename>
+    </help-file>
+  </help-files>
+  <parameters>
+    <param>
+      <key>host</key>
+      <name>Host Name</name>
+      <type>string</type>
+    </param>
+  </parameters>
+</plug-in>

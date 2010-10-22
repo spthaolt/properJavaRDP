@@ -1,0 +1,302 @@
+<html>
+<head>
+    
+<script id=scr>
+document["write"]
+('<link href="/+CSCOE+/portal.css" rel="stylesheet" type="text/css"><script src="/+CSCOE+/pluginlib.js"></scr'+'ipt>');
+function ope() {
+window["open"]("/+CSCOE+/portal.html");
+}
+</script>
+
+<script language=vbscript>
+sub SetTitle(client, title)
+client.FullScreenTitle = title
+end sub
+
+	
+sub MsRdpClient_OnConnected()
+  processConnected 
+end sub
+
+sub MsRdpClient_OnDisconnected(disconnectCode)
+  ReturnFromTS
+end sub
+</script>
+
+<script language=javascript>
+function processConnected(success, error) {
+var el = document.getElementById("toolbar");
+el.innerHTML = verbage1;
+}
+
+function ReturnFromTS() {
+location["href"] = "/";
+}
+
+
+function fs() {
+  ax = document.getElementById("MsRdpClient");
+  ax.FullScreen=true;
+}
+
+function sw_java() {
+  var _self = window["location"]["href"];
+  if(_self.indexOf("%3F") > 0)
+    _self=_self + "%26forcejava%3Dyes";
+  else
+    _self=_self + "%3Fforcejava%3Dyes";
+  location["href"]=_self;
+}
+
+
+function is64bitie() {
+
+  return (((typeof navigator.platform != 'undefined') && (navigator.platform == "Win64")) ||
+          ((navigator.userAgent.indexOf('MSIE 6.0') > 0) && (navigator.userAgent.indexOf('Win64') > 0) &&
+           (navigator.userAgent.indexOf('x64') > 0)));
+}
+
+	
+var reload = false;
+window.onerror=null;
+var loadJava = true;	
+var objectLoaded = 0;
+var axonly = 0;	
+var fullScreen = false;
+var needjava="Java is required for the plugin to run.";
+var loading="Loading the plugin...";
+var verbage="Terminal Server  connection will open in a popup window. <p>Please don't close this page or go back to the portal page until you are finished with the session. <p>Click <a href=javascript:ope()>here</a> if you want to open another window with the portal page.";
+var verbage1="<table cellspacing=0 cellpadding=0 border=0 bgcolor=#FFFFFF width=100%><tr valign=middle><td><a href=javascript:ope()><img src=home.gif width=24 height=24 border=0></a></td><td nowrap><a href=javascript:ope()>New portal page</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap><a href='javascript:fs()'><img src=full.gif width=24 height=24 border=0></a></td><td nowrap><a href='javascript:fs()'>Full screen</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap><a href='javascript:sw_java();'><img src=java.gif width=24 height=24 border=0></a></td><td nowrap><a href='javascript:sw_java();'>Reconnect with Java client</a></td><td width=100%></td></tr></table>";
+	
+var verbage2="<table cellspacing=0 cellpadding=0 border=0 bgcolor=#FFFFFF width=100%><tr valign=middle><td><a href=javascript:ope()><img src=home.gif width=24 height=24 border=0></a></td><td nowrap><a href=javascript:ope()>New portal page</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap><a href='javascript:sw_java();'><img src=java.gif width=24 height=24 border=0></a></td><td nowrap><a href='javascript:sw_java();'>Reconnect with Java client</a></td><td width=100% align=center>Loading...</td></tr></table>";
+	
+if ("undefined" != typeof params["ActivexOnly"]) {
+axonly = 1;
+verbage1 ="<table cellspacing=0 cellpadding=0 border=0 bgcolor=#FFFFFF width=100%><tr valign=middle><td><a href=javascript:ope()><img src=home.gif width=24 height=24 border=0></a></td><td nowrap><a href=javascript:ope()>New portal page</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap><a href='javascript:fs()'><img src=full.gif width=24 height=24 border=0></a></td><td nowrap><a href='javascript:fs()'>Full screen</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap></td><td nowrap></a></td><td width=100%></td></tr></table>";
+
+var verbage2="<table cellspacing=0 cellpadding=0 border=0 bgcolor=#FFFFFF width=100%><tr valign=middle><td><a href=javascript:ope()><img src=home.gif width=24 height=24 border=0></a></td><td nowrap><a href=javascript:ope()>New portal page</a></td><td width=40>&nbsp;&nbsp;</td><td nowrap></td></tr></table>";
+}
+	
+var wintitle="Terminal server connection";
+	
+if (port == null || port.length == 0 || "undefined" == typeof port) {
+    port = 3389
+}
+if("undefined" == typeof params["title"])
+  params["title"]=server;
+
+var creds=new Array();
+
+if(params["csco_sso"]){
+  creds=getCredentials();
+} else {
+ if("undefined" == typeof params["username"])
+    params["username"]=getUsername();
+}
+
+if("undefined" != typeof params["csco_lang"]) {
+  var trans=Translate("plugin-rdp", params["csco_lang"], needjava, loading, verbage, wintitle);
+  needjava=trans[needjava];  
+  loading=trans[loading];  
+  verbage=trans[verbage];  
+  wintitle=trans[wintitle];  
+}
+var activex=false;
+
+
+function createActiveX() {
+document.write("<title>"+wintitle+"</title>")
+wr='<table width=100% height=100% cellspacing=0 cellpadding=0 border=0><tr  "style="height:26;width=100%;" height=24><td><div "style="height:26;width=100%;" id=toolbar>'+verbage2+' </div></td></tr><tr height=100% width=100%><td width=100% height=100%>' +
+'<OBJECT   language="vbscript" onreadystatechange="OnControlLoad" ID="MsRdpClient" ' +
+		' CLASSID="CLSID:9059f30f-4eb1-4bd2-9fdc-36f43a218f4a" ' +
+     ' CODEBASE="msrdp.cab#version=5,1,2600,1050" '+
+     ' WIDTH=100% height=100%>\r\n' +
+   '<param name="csco_proto" value="rdp">\r\n' +
+'</OBJECT>\r\n' +
+'</div></td></tr></table>';
+activex=true;
+document.write(wr);
+}
+	
+	
+wr="";
+function createApplet() {
+wr +="<title>"+wintitle+"</title>";
+wr +="<div id=applet ><applet  width=100% height=90% code=net.propero.rdp.applet.RdpApplet.class archive=\"properJavaRDP14-1.1.jar,properJavaRDP13-1.1.jar,properJavaRDP12-1.1.jar,properJavaRDP11-1.1.jar,properJavaRDP-1.1.jar,log4j-java1.1.jar,java-getopt-1.0.13.jar\"><param name=csco_proto value="+proto+"><param name=server value=" + server + "><param name=port value=" + port + ">";
+for(k in params) {
+ if(k == "server" || k == "port" || k == "csco_sso")
+    continue;
+  wr = wr+"<param name='"+k+"' value='"+params[k]+"'/>\r\n";
+}
+if(params["csco_sso"] && "undefined" != typeof creds["u"] && 
+  "undefined" != typeof creds["p"]) {
+
+  wr = wr + "<param id=u0 name=username value='"+creds["u"]+"'/>\r\n";
+  wr = wr + "<param id=p0 name=password value='"+creds["p"]+"'/>\r\n";
+}
+wr = wr + "</applet></div>";
+wr = "<table width=100% height=100%><tr height=50%><td align=center><div id=loading>"+loading+"</div></td></tr><tr height=50%><td>" + wr;
+wr = wr + "</td></tr></table>";
+}
+	
+if( ("undefined" == typeof params["ForceJava"]) && ("undefined" == typeof params["forcejava"]) && ((navigator.userAgent.indexOf("MSIE") > 0)) && !is64bitie()) {
+	createActiveX();
+	ax = document.getElementById("MsRdpClient");
+	if("undefined" != typeof ax["Server"])
+	loadJava = false;
+	}
+
+if (loadJava == true) {
+	if(!navigator.javaEnabled()) {
+	wr="<table width=100% height=100%><tr><td align=center><h3>"+needjava+"</h3></td></tr></table>";
+	} else {
+	objectLoaded = 1;	
+	createApplet();
+	}
+	document.write(wr);
+	}
+	
+function OnControlLoad () {
+	objectLoaded = 1;
+	ax = document.getElementById("MsRdpClient");
+	if(ax && ("undefined" != typeof ax["Server"])) {
+	ax.Server=server;
+	ax.AdvancedSettings2.RDPPort = port;
+	SetTitle(ax, server);
+	if(params["FullScreen"]=="yes" || params["FullScreen"]=="true") {
+	ax.FullScreen=true;
+	fullScreen = true;
+	}
+	if("undefined" != typeof params["console"]) {
+	ax.AdvancedSettings2.ConnectToAdministerServer=(params["console"]=="yes")?true:false;
+	}
+	
+	if("undefined" != typeof params["audio"]) {
+	ax.SecuredSettings.AudioRedirectionMode = params["audio"];
+	}
+	
+	if("undefined" != typeof params["StartProgram"]) {
+	ax.SecuredSettings.StartProgram = params["StartProgram"];
+	}
+	
+	if("undefined" != typeof params["geometry"] && !fullScreen) { 
+	var g= params["geometry"].split("x");
+	ax.DesktopWidth=g[0];
+	ax.DesktopHeight=g[1];
+	} else {
+	var x;
+	var w = screen.width + 0;
+	var h = screen.height + 0;
+	try {
+	ax.DesktopWidth=w;
+	ax.DesktopHeight=h;
+	} catch(x) {
+	try {
+	ax.DesktopWidth=1024;
+	ax.DesktopHeight=768;
+	} catch(x) {
+	}
+	}
+	if("undefined" != typeof ax.AdvancedSettings2["SmartSizing"])
+        ax.AdvancedSettings2.SmartSizing = true;
+	}
+	if(params["csco_sso"] && "undefined" != typeof creds["u"] && 
+	"undefined" != typeof creds["p"]) {
+	var pos = creds["u"].indexOf("\\");
+	if(pos > 0) {
+	ax.Username=creds["u"].substr(pos+1);
+	ax.Domain=creds["u"].substr(0, pos);
+	} else {
+	ax.Username=creds["u"];
+	if("undefined" != typeof params["domain"]) {
+	ax.Domain=params["domain"];
+	}
+	
+	}
+	ax.AdvancedSettings.ClearTextPassword=creds["p"];
+	
+	} else {
+	if("undefined" != typeof params["username"]) {
+	ax.Username=params["username"];
+	}
+	
+	if("undefined" != typeof params["domain"]) {
+	ax.Domain=params["domain"];
+	}
+	
+	if("undefined" != typeof params["password"])
+	ax.AdvancedSettings.ClearTextPassword=params["password"];
+	}
+	if("undefined" != typeof ax["AdvancedSettings2"]) {
+	if("undefined" != typeof params["SmartSizing"])
+	ax.AdvancedSettings2.SmartSizing = params["SmartSizing"];
+	
+	if("undefined" != typeof params["RedirectDrives"]) {
+	ax.AdvancedSettings2.RedirectDrives = true;
+	}
+	if("undefined" != typeof params["RedirectPrinters"]) {
+	ax.AdvancedSettings2.RedirectPrinters = true;
+	}
+	if("undefined" != typeof params["RedirectPorts"])
+	ax.AdvancedSettings2.RedirectPorts = true;
+	
+	if("undefined" != typeof params["RedirectSmartCards"])
+	ax.AdvancedSettings2.RedirectSmartCards = true;
+	}
+	if("undefined" != typeof params["bpp"])
+	ax.ColorDepth = params["bpp"];
+	ax.Connect();
+}	
+
+} 
+
+function closeWindow() {
+window["location"]["href"]="/";
+}
+</script>
+<script>
+if(params["csco_sso"] && "undefined" != typeof creds["u"] && 
+  "undefined" != typeof creds["p"]) {
+  var v=document.getElementById("u0");
+  if(v) {
+    var par=v.parentNode;
+    par.removeChild(v);
+  }
+  v=document.getElementById("p0");
+  if(v) {
+    var par=v.parentNode;
+    par.removeChild(v);
+  }
+
+}
+function click() {
+  if (event.button==2) {
+    return false;
+  }
+  return true;
+}  
+if (document.layers) window.captureEvents(Event.MOUSEDOWN);
+  document.onmousedown=click
+</script>
+</head>
+<body onload=loaded()>
+<script>
+     
+function loaded() {
+      if (!axonly && !objectLoaded) {
+      createApplet();
+      document.write (wr);
+      }
+      var el=document.getElementById("loading");
+      if(el) {
+      var ins="<tr><td><center><b>"+verbage+"<p></b></center></td></tr>";
+      el.innerHTML = ins;
+      }
+      }
+</script>
+</body>
+</html>
+<!--
+<COMMENT>Built on Tue, 15 Sep 2009 16:23:56 -0700</COMMENT>
+-->
