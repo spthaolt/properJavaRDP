@@ -230,8 +230,8 @@ public class MapDef {
 	protected boolean appliesToTyped(KeyEvent e, boolean capslock) {
 
 		if (Constants.OS == Constants.MAC) {
-			// Remap the hash key to ง
-			if (Options.remap_hash && (e.getKeyChar() == 'ง')) {
+			// Remap the hash key to ยง
+			if (Options.remap_hash && (e.getKeyChar() == 'ยง')) {
 				return ((characterDef) && (this.keyChar == '#'));
 			}
 
